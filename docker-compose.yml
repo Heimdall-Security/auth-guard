@@ -1,7 +1,16 @@
 services:
   consul:
-    image: consul:latest
+    image: hashicorp/consul:latest
     container_name: consul
     ports:
       - "8500:8500"
+    restart: unless-stopped
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
     restart: unless-stopped
