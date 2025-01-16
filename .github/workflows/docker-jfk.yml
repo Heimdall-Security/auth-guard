@@ -11,7 +11,9 @@ permissions:
 jobs:
   java-builder:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        image: ['jfk-gateway']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -44,9 +46,9 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Docker Metadata Generation
         uses: docker/metadata-action@v5
-        id: docker-metadata-jfk-gateway
+        id: docker-metadata-builder
         with:
-          images: heimdallauth/jfk-gateway
+          images: heimdallauth/${{ matrix.image }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -56,6 +58,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.docker-metadata-kratos.outputs.tags }}
+          tags: ${{ steps.docker-metadata-builder.outputs.tags }}
           push: true
-          context: ./jfk-gateway/
+          context: ./${{matrix.image}}/
