@@ -13,6 +13,7 @@ import java.util.List;
 public class GroupModel {
     private String id;
     private String hrn;
+    private String tenantId;
     private String groupName;
     private String groupDescription;
     private List<RoleModel> roles;
