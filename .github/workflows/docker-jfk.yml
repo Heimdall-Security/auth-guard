@@ -1,4 +1,4 @@
-name: Docker Kratos Image CI
+name: Docker Matrix Builder
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  java-builder:
+  docker-image-builder:
     runs-on: ubuntu-latest
     strategy:
       matrix:
