@@ -1,3 +1,4 @@
 rootProject.name = 'auth-guard'
 include 'commons'
+include 'jfk-gateway'
 
