@@ -3,6 +3,7 @@ package com.heimdallauth.server.datamanagers;
 import com.heimdallauth.server.commons.models.GroupModel;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface GroupDataManager {
     GroupModel createGroup(GroupModel groupModel);
@@ -17,4 +18,5 @@ public interface GroupDataManager {
     void removeUserFromGroupMembership(String groupId, String memberId);
     void removeUsersFromGroupMembership(String groupId, List<String> memberIds);
     List<String> getGroupMembers(String groupId);
+    Optional<GroupModel> searchGroup(String searchTerm);
 }

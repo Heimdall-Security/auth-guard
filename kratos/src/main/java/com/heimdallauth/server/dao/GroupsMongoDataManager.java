@@ -3,10 +3,14 @@ package com.heimdallauth.server.dao;
 import com.heimdallauth.server.datamanagers.GroupDataManager;
 import com.heimdallauth.server.commons.models.GroupModel;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public class GroupsMongoDataManager implements GroupDataManager {
     private final MongoTemplate mongoTemplate;
@@ -99,5 +103,16 @@ public class GroupsMongoDataManager implements GroupDataManager {
     @Override
     public List<String> getGroupMembers(String groupId) {
         return List.of();
+    }
+
+    @Override
+    public Optional<GroupModel> searchGroup(String searchTerm) {
+        Query searchDBQuery = new Query();
+        searchDBQuery.addCriteria(new Criteria().orOperator(
+                Criteria.where("groupName").regex(searchTerm, "i"),
+                Criteria.where("groupDescription").regex(searchTerm, "i")
+        ));
+        return Optional.ofNullable(this.mongoTemplate.findOne(searchDBQuery, GroupDocument.class, COLLECTION_GROUPS))
+                .map(GroupsMongoDataManager::convertGroupDocumentToGroupModel);
     }
 }
