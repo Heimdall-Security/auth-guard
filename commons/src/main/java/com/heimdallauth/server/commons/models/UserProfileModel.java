@@ -1,5 +1,6 @@
 package com.heimdallauth.server.commons.models;
 
+import com.heimdallauth.server.commons.constants.UserLifecycleStage;
 import lombok.*;
 
 import java.time.Instant;
@@ -12,6 +13,7 @@ import java.time.Instant;
 public class UserProfileModel {
     private String id;
     private String username;
+    private UserLifecycleStage lifecycleStage;
     private String emailAddress;
     private String firstName;
     private String lastName;
