@@ -10,7 +10,7 @@ public interface UserProfileDataManager {
 
     List<UserProfileModel> getAllUserProfiles();
     Optional<UserProfileModel> getUserProfileById(String profileId);
-
-    List<UserProfileModel> searchUserProfile(String searchTerm);
+    Optional<UserProfileModel> searchUserProfile(String searchTerm);
+    Optional<UserProfileModel> searchUserProfileWithUsernameOrEmailAddress(String username, String emailAddress);
     Optional<UserProfileModel> updateUserProfile(String profileId, UserProfileModel updatedUserProfileModel);
 }
