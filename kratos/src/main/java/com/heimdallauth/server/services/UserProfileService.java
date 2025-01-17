@@ -18,6 +18,9 @@ public class UserProfileService {
         this.userProfileDataManager = userProfileDataManager;
     }
 
+    public UserProfileModel provisionUserProfile(UserProfileModel userProfileModel){
+        return provisionUserProfile(UserLifecycleStage.PROVISIONED, userProfileModel);
+    }
     public UserProfileModel provisionUserProfile(UserLifecycleStage lifecycleStage, UserProfileModel userProfileModel) {
         log.info("Provisioning user profile for user: Username: {}, Email:{}", userProfileModel.getUsername(),userProfileModel.getEmailAddress());
         UserProfileModel createdUserProfile =  userProfileDataManager.createNewUserProfile(
