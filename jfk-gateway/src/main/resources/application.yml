@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: jfk-gateway
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: kratos
+            uri: lb://kratos
+            predicates:
+              - Path=/api/kratos/**
