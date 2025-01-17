@@ -7,6 +7,8 @@ import com.heimdallauth.server.exceptions.UserProfileNotFound;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @Slf4j
 public class UserProfileService {
@@ -30,6 +32,11 @@ public class UserProfileService {
             updateLifecycleStage(createdUserProfile.getId(), lifecycleStage);
         }
         return createdUserProfile;
+    }
+    public UserProfileModel searchUserProfile(String searchTerm){
+        Optional<UserProfileModel> searchedUserProfile = this.userProfileDataManager.searchUserProfile(searchTerm);
+        return searchedUserProfile.orElseThrow(() -> new UserProfileNotFound("User profile not found"));
+
     }
     public void updateLifecycleStage(String profileId, UserLifecycleStage lifecycleStage) {
         UserProfileModel currentUserProfile = this.userProfileDataManager.getUserProfileById(profileId).orElseThrow(() -> new UserProfileNotFound("User profile not found"));
