@@ -1,6 +1,6 @@
 package com.heimdallauth.server.dao;
 
-import com.heimdallauth.server.GroupDataManager;
+import com.heimdallauth.server.datamanagers.GroupDataManager;
 import com.heimdallauth.server.commons.models.GroupModel;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;

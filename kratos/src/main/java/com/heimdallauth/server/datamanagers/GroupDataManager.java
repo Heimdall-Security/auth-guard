@@ -1,4 +1,4 @@
-package com.heimdallauth.server;
+package com.heimdallauth.server.datamanagers;
 
 import com.heimdallauth.server.commons.models.GroupModel;
 
