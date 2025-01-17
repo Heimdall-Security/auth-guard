@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/v1/user-profile")
 @Tag(name = "User Profile", description = "User Profile API")
@@ -19,11 +21,16 @@ public class UserProfileController {
     }
 
     @GetMapping("/profiles/search")
-    public ResponseEntity<UserProfileModel> searchUserProfile(@RequestParam("searchTerm") String searchTerm){
+    public ResponseEntity<List<UserProfileModel>> searchUserProfile(@RequestParam("searchTerm") String searchTerm) {
         return ResponseEntity.ok(this.userProfileService.searchUserProfile(searchTerm));
     }
     @PostMapping("/profiles/create")
     public ResponseEntity<UserProfileModel> createNewUserProfile(@RequestBody UserProfileModel userProfileModel){
         return ResponseEntity.ok(this.userProfileService.provisionUserProfile(userProfileModel));
+    }
+
+    @GetMapping("/profiles")
+    public ResponseEntity<List<UserProfileModel>> getAllUserProfiles() {
+        return ResponseEntity.ok(this.userProfileService.getAllUserProfiles());
     }
 }
