@@ -3,6 +3,7 @@ package com.heimdallauth.server.services;
 import com.heimdallauth.server.commons.constants.UserLifecycleStage;
 import com.heimdallauth.server.commons.models.UserProfileModel;
 import com.heimdallauth.server.datamanagers.UserProfileDataManager;
+import com.heimdallauth.server.exceptions.UserProfileAlreadyExist;
 import com.heimdallauth.server.exceptions.UserProfileNotFound;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,19 +23,24 @@ public class UserProfileService {
         return provisionUserProfile(UserLifecycleStage.PROVISIONED, userProfileModel);
     }
     public UserProfileModel provisionUserProfile(UserLifecycleStage lifecycleStage, UserProfileModel userProfileModel) {
-        log.info("Provisioning user profile for user: Username: {}, Email:{}", userProfileModel.getUsername(),userProfileModel.getEmailAddress());
-        UserProfileModel createdUserProfile =  userProfileDataManager.createNewUserProfile(
-                userProfileModel.getUsername(),
-                userProfileModel.getEmailAddress(),
-                userProfileModel.getFirstName(),
-                userProfileModel.getLastName(),
-                userProfileModel.getPhoneNumber()
-        );
-        log.info("User profile provisioned successfully for user: id: {},Username: {}, Email:{}",createdUserProfile.getId(), userProfileModel.getUsername(),userProfileModel.getEmailAddress());
-        if(lifecycleStage != UserLifecycleStage.PROVISIONED) {
-            updateLifecycleStage(createdUserProfile.getId(), lifecycleStage);
+        boolean proceed = this.userProfileDataManager.searchUserProfileWithUsernameOrEmailAddress(userProfileModel.getUsername(), userProfileModel.getEmailAddress()).isEmpty();
+        if(proceed){
+            log.info("Provisioning user profile for user: Username: {}, Email:{}", userProfileModel.getUsername(), userProfileModel.getEmailAddress());
+            UserProfileModel createdUserProfile = userProfileDataManager.createNewUserProfile(
+                    userProfileModel.getUsername(),
+                    userProfileModel.getEmailAddress(),
+                    userProfileModel.getFirstName(),
+                    userProfileModel.getLastName(),
+                    userProfileModel.getPhoneNumber()
+            );
+            log.info("User profile provisioned successfully for user: id: {},Username: {}, Email:{}", createdUserProfile.getId(), userProfileModel.getUsername(), userProfileModel.getEmailAddress());
+            if (lifecycleStage != UserLifecycleStage.PROVISIONED) {
+                updateLifecycleStage(createdUserProfile.getId(), lifecycleStage);
+            }
+            return createdUserProfile;
+        }else{
+            throw new UserProfileAlreadyExist("The user profile with username or email already exist");
         }
-        return createdUserProfile;
     }
 
     public List<UserProfileModel> searchUserProfile(String searchTerm) {
