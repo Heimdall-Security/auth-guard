@@ -54,6 +54,8 @@ public class UserProfileMongoDataManagerImpl implements UserProfileDataManager {
                 .createdOn(Instant.now())
                 .lastUpdatedTimestamp(Instant.now())
                 .emailAddress(emailAddress)
+                .firstName(firstName)
+                .lastName(lastName)
                 .username(username)
                 .phoneNumber(phoneNumber)
                 .lifecycleStage(UserLifecycleStage.PROVISIONED)
