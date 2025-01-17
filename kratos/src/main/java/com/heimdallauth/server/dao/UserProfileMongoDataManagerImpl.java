@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -54,6 +55,8 @@ public class UserProfileMongoDataManagerImpl implements UserProfileDataManager {
                 .createdOn(Instant.now())
                 .lastUpdatedTimestamp(Instant.now())
                 .emailAddress(emailAddress)
+                .firstName(firstName)
+                .lastName(lastName)
                 .username(username)
                 .phoneNumber(phoneNumber)
                 .lifecycleStage(UserLifecycleStage.PROVISIONED)
@@ -63,16 +66,22 @@ public class UserProfileMongoDataManagerImpl implements UserProfileDataManager {
     }
 
     @Override
+    public List<UserProfileModel> getAllUserProfiles() {
+        List<UserProfileDocument> allUserProfilesDocument = this.mongoTemplate.findAll(UserProfileDocument.class, USER_PROFILE_COLLECTION_NAME);
+        return allUserProfilesDocument.stream().map(UserProfileMongoDataManagerImpl::convertToUserProfileModel).toList();
+    }
+
+    @Override
     public Optional<UserProfileModel> getUserProfileById(String profileId) {
         Query selectUserProfileById = Query.query(Criteria.where("id").is(profileId));
         return Optional.ofNullable(this.mongoTemplate.findOne(selectUserProfileById, UserProfileDocument.class, USER_PROFILE_COLLECTION_NAME)).map(UserProfileMongoDataManagerImpl::convertToUserProfileModel);
     }
 
     @Override
-    public Optional<UserProfileModel> searchUserProfile(String searchTerm) {
+    public List<UserProfileModel> searchUserProfile(String searchTerm) {
         Query searchQuery = new Query();
-        searchQuery.addCriteria(Criteria.where("username").is(searchTerm).orOperator(Criteria.where("emailAddress").is(searchTerm)));
-        return Optional.ofNullable(this.mongoTemplate.findOne(searchQuery, UserProfileDocument.class, USER_PROFILE_COLLECTION_NAME)).map(UserProfileMongoDataManagerImpl::convertToUserProfileModel);
+        searchQuery.addCriteria(Criteria.where("username").regex(searchTerm, "i").orOperator(Criteria.where("emailAddress").regex(searchTerm, "i")));
+        return this.mongoTemplate.find(searchQuery, UserProfileDocument.class, USER_PROFILE_COLLECTION_NAME).stream().map(UserProfileMongoDataManagerImpl::convertToUserProfileModel).toList();
     }
 
     @Override
