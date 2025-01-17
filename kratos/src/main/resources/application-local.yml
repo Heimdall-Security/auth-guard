@@ -1,0 +1,10 @@
+server:
+  port: 0
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+  cloud:
+    config:
+      enabled: false
