@@ -76,6 +76,12 @@ public class UserProfileMongoDataManagerImpl implements UserProfileDataManager {
     }
 
     @Override
+    public Optional<UserProfileModel> searchUserProfileWithUsernameOrEmailAddress(String username, String emailAddress) {
+        Query searchQuery = Query.query(Criteria.where("username").regex(username,"i").orOperator(Criteria.where("emailAddress").regex(emailAddress,"i")));
+        return Optional.ofNullable(this.mongoTemplate.findOne(searchQuery, UserProfileDocument.class, USER_PROFILE_COLLECTION_NAME)).map(UserProfileMongoDataManagerImpl::convertToUserProfileModel);
+    }
+
+    @Override
     public Optional<UserProfileModel> updateUserProfile(String profileId, UserProfileModel updatedUserProfileModel) {
         return Optional.empty();
     }

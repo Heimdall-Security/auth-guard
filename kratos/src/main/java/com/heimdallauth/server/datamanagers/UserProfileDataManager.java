@@ -8,5 +8,6 @@ public interface UserProfileDataManager {
     UserProfileModel createNewUserProfile(String username, String emailAddress, String firstName, String lastName, String phoneNumber);
     Optional<UserProfileModel> getUserProfileById(String profileId);
     Optional<UserProfileModel> searchUserProfile(String searchTerm);
+    Optional<UserProfileModel> searchUserProfileWithUsernameOrEmailAddress(String username, String emailAddress);
     Optional<UserProfileModel> updateUserProfile(String profileId, UserProfileModel updatedUserProfileModel);
 }
