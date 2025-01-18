@@ -115,4 +115,12 @@ public class GroupsMongoDataManager implements GroupDataManager {
         return Optional.ofNullable(this.mongoTemplate.findOne(searchDBQuery, GroupDocument.class, COLLECTION_GROUPS))
                 .map(GroupsMongoDataManager::convertGroupDocumentToGroupModel);
     }
+
+    @Override
+    public List<GroupModel> getAllGroups() {
+        List<GroupDocument> allGroups = this.mongoTemplate.findAll(GroupDocument.class, COLLECTION_GROUPS);
+        return allGroups.stream()
+                .map(GroupsMongoDataManager::convertGroupDocumentToGroupModel)
+                .toList();
+    }
 }

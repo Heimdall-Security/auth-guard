@@ -19,4 +19,5 @@ public interface GroupDataManager {
     void removeUsersFromGroupMembership(String groupId, List<String> memberIds);
     List<String> getGroupMembers(String groupId);
     Optional<GroupModel> searchGroup(String searchTerm);
+    List<GroupModel> getAllGroups();
 }
