@@ -18,12 +18,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.heimdallauth.server.constants.MongoCollectionConstants.*;
+
 @Repository
 public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleDataManager {
     private final MongoTemplate mongoTemplate;
-    private static final String COLLECTION_GROUPS = "groups-collection";
-    private static final String COLLECTION_GROUP_ROLE_MEMBERSHIPS = "group-role-memberships-collection";
-    private static final String ROLES_COLLECTION = "role-collection";
 
     public GroupRoleDataManagerMongoImpl(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
@@ -70,7 +69,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
     public GroupModel createGroup(GroupModel groupModel) {
         GroupDocument documentToSave = convertGroupModelToGroupDocument(groupModel);
         documentToSave.setId(UUID.randomUUID().toString());
-        GroupDocument savedDocument = this.mongoTemplate.save(documentToSave, COLLECTION_GROUPS);
+        GroupDocument savedDocument = this.mongoTemplate.save(documentToSave, GROUPS_COLLECTION);
         return this.getGroup(savedDocument.getId()).orElseThrow(() -> new GroupNotFound("The group not found", savedDocument.getId()));
     }
 
@@ -94,10 +93,10 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
     public Optional<GroupModel> getGroup(String groupId) {
         Aggregation mongoGroupSelectionAggregationPipeline = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("_id").is(groupId)),
-                Aggregation.lookup(COLLECTION_GROUP_ROLE_MEMBERSHIPS, "_id", "groupId", "rolesId"),
+                Aggregation.lookup(GROUP_ROLE_MEMBERSHIP_COLLECTION, "_id", "groupId", "rolesId"),
                 Aggregation.lookup(ROLES_COLLECTION, "rolesId.roleId", "_id", "roles")
         );
-        GroupAggregationModel aggregationResults = this.mongoTemplate.aggregate(mongoGroupSelectionAggregationPipeline, COLLECTION_GROUPS, GroupAggregationModel.class).getUniqueMappedResult();
+        GroupAggregationModel aggregationResults = this.mongoTemplate.aggregate(mongoGroupSelectionAggregationPipeline, GROUPS_COLLECTION, GroupAggregationModel.class).getUniqueMappedResult();
         return Optional.ofNullable(aggregationResults).map(GroupAggregationModel::toGroupModel);
     }
 
@@ -148,17 +147,17 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
                 Criteria.where("groupName").regex(searchTerm, "i"),
                 Criteria.where("groupDescription").regex(searchTerm, "i")
         ));
-        return Optional.ofNullable(this.mongoTemplate.findOne(searchDBQuery, GroupDocument.class, COLLECTION_GROUPS))
+        return Optional.ofNullable(this.mongoTemplate.findOne(searchDBQuery, GroupDocument.class, GROUPS_COLLECTION))
                 .map(GroupRoleDataManagerMongoImpl::convertGroupDocumentToGroupModel);
     }
 
     @Override
     public List<GroupModel> getAllGroups() {
         Aggregation mongoGroupSelectionAggregationPipeline = Aggregation.newAggregation(
-                Aggregation.lookup(COLLECTION_GROUP_ROLE_MEMBERSHIPS, "_id", "groupId", "rolesId"),
+                Aggregation.lookup(GROUP_ROLE_MEMBERSHIP_COLLECTION, "_id", "groupId", "rolesId"),
                 Aggregation.lookup(ROLES_COLLECTION, "rolesId.roleId", "_id", "roles")
         );
-        List<GroupAggregationModel> aggregationResults = this.mongoTemplate.aggregate(mongoGroupSelectionAggregationPipeline, COLLECTION_GROUPS, GroupAggregationModel.class).getMappedResults();
+        List<GroupAggregationModel> aggregationResults = this.mongoTemplate.aggregate(mongoGroupSelectionAggregationPipeline, GROUPS_COLLECTION, GroupAggregationModel.class).getMappedResults();
         return aggregationResults.stream().map(GroupAggregationModel::toGroupModel).toList();
     }
 
@@ -166,8 +165,8 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
     public GroupModel updateGroupRoleMapping(String groupId, List<String> roleIds) {
         Query selectGroupQuery = Query.query(Criteria.where("id").is(groupId));
         Query selectionRoleMembershipQuery = Query.query(Criteria.where("groupId").is(groupId));
-        GroupDocument groupDocument = Optional.ofNullable(this.mongoTemplate.findOne(selectGroupQuery, GroupDocument.class, COLLECTION_GROUPS)).orElseThrow(() -> new GroupNotFound("The group not found", groupId));
-        List<GroupRoleMembershipDocument> groupMemberships = this.mongoTemplate.find(selectionRoleMembershipQuery, GroupRoleMembershipDocument.class, COLLECTION_GROUP_ROLE_MEMBERSHIPS);
+        GroupDocument groupDocument = Optional.ofNullable(this.mongoTemplate.findOne(selectGroupQuery, GroupDocument.class, GROUPS_COLLECTION)).orElseThrow(() -> new GroupNotFound("The group not found", groupId));
+        List<GroupRoleMembershipDocument> groupMemberships = this.mongoTemplate.find(selectionRoleMembershipQuery, GroupRoleMembershipDocument.class, GROUP_ROLE_MEMBERSHIP_COLLECTION);
         List<String> filteredRoleMemberships = roleIds.stream().filter(roleId -> groupMemberships.stream().noneMatch(groupRoleMembershipDocument -> groupRoleMembershipDocument.getRoleId().equals(roleId))).toList();
         List<GroupRoleMembershipDocument> newRoleMemberships = filteredRoleMemberships.stream()
                 .map(roleId -> GroupRoleMembershipDocument.builder()
@@ -178,7 +177,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
                         .lastUpdatedOn(Instant.now())
                         .build())
                 .toList();
-        this.mongoTemplate.insert(newRoleMemberships, COLLECTION_GROUP_ROLE_MEMBERSHIPS);
+        this.mongoTemplate.insert(newRoleMemberships, GROUP_ROLE_MEMBERSHIP_COLLECTION);
         return this.getGroup(groupId).orElseThrow(() -> new GroupNotFound("The group not found", groupId));
     }
 
