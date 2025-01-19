@@ -67,7 +67,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
     public GroupModel createGroup(GroupModel groupModel) {
         GroupDocument documentToSave = convertGroupModelToGroupDocument(groupModel);
         GroupDocument savedDocument = this.mongoTemplate.save(documentToSave, COLLECTION_GROUPS);
-        return convertGroupDocumentToGroupModel(savedDocument);
+        return this.getGroup(savedDocument.getId()).orElseThrow(() -> new GroupNotFound("The group not found", savedDocument.getId()));
     }
 
     @Override
