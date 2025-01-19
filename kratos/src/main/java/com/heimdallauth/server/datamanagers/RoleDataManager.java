@@ -2,6 +2,7 @@ package com.heimdallauth.server.datamanagers;
 
 import com.heimdallauth.server.commons.models.RoleModel;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface RoleDataManager {
@@ -9,4 +10,5 @@ public interface RoleDataManager {
     Optional<RoleModel> getRoleById(String roleId);
     Optional<RoleModel> searchRoleUsingRoleNameOrRoleDescription(String searchTerm);
     Optional<RoleModel> updateRole(String roleId, String roleName, String roleDescription);
+    List<RoleModel> getAllRoles();
 }
