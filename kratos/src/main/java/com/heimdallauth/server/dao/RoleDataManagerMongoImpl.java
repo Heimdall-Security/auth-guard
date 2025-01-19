@@ -52,7 +52,7 @@ public class RoleDataManagerMongoImpl implements RoleDataManager {
     }
 
     @Override
-    public Optional<RoleModel> getRole(String roleId) {
+    public Optional<RoleModel> getRoleById(String roleId) {
         Query selectRoleFromId = Query.query(Criteria.where("id").is(roleId));
         return Optional.ofNullable(mongoTemplate.findOne(selectRoleFromId, RoleDocument.class, ROLES_COLLECTION)).map(RoleDataManagerMongoImpl::convertToRoleModel);
     }
