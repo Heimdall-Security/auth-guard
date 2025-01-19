@@ -9,7 +9,7 @@ public interface GroupDataManager {
     GroupModel createGroup(GroupModel groupModel);
     List<GroupModel> createGroup(List<GroupModel> groupModels);
     GroupModel updateGroup(String groupId, GroupModel updatedGroupModel);
-    GroupModel getGroup(String groupId);
+    Optional<GroupModel> getGroup(String groupId);
     List<GroupModel> getGroups(List<String> groupIds);
     List<GroupModel> getGroupsByTenantId(String tenantId);
     List<GroupModel> getGroupsByTenantIdAndGroupName(String tenantId, String groupName);

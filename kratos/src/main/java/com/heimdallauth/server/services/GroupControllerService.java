@@ -5,11 +5,9 @@ import com.heimdallauth.server.commons.models.GroupModel;
 import com.heimdallauth.server.commons.models.RoleModel;
 import com.heimdallauth.server.datamanagers.GroupDataManager;
 import com.heimdallauth.server.datamanagers.RoleDataManager;
-import com.heimdallauth.server.exceptions.RoleNotFound;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,14 +32,12 @@ public class GroupControllerService {
         return groupDM.getAllGroups();
     }
 
-    public GroupModel updateGroupRoleMapping(String groupId, List<String> rolesIds){
-        List<String> invalidRoleIds = new ArrayList<>();
-        try {
-            List<RoleModel> validatedRoles = rolesIds.stream().map(roleId -> this.roleDM.getRoleById(roleId).orElseThrow(() -> new RoleNotFound(String.format("The role with requestedId %s could not be found", roleId)))).toList();
-            return groupDM.updateGroupRoleMapping(groupId, validatedRoles.stream().map(RoleModel::getId).toList());
-        }catch (RoleNotFound roleNotFound){
-            invalidRoleIds.add(roleNotFound.getMessage());
+    public GroupModel updateGroupRoleMapping(String groupId, List<String> rolesIds) {
+        List<RoleModel> validatedRoles = this.roleDM.getRolesByIds(rolesIds);
+        List<String> invalidRoleIds = rolesIds.stream().filter(s -> validatedRoles.stream().map(RoleModel::getId).noneMatch(s::equals)).toList();
+        if (!invalidRoleIds.isEmpty()) {
+            log.error("Invalid role ids: {}", invalidRoleIds);
         }
-        throw new RoleNotFound(String.format("The following roleIds are invalid: %s", invalidRoleIds));
+        return groupDM.updateGroupRoleMapping(groupId, validatedRoles.stream().map(RoleModel::getId).toList());
     }
 }
