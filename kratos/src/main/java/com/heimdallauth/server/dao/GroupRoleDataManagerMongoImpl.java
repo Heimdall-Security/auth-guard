@@ -5,7 +5,9 @@ import com.heimdallauth.server.commons.models.RoleModel;
 import com.heimdallauth.server.datamanagers.GroupDataManager;
 import com.heimdallauth.server.datamanagers.RoleDataManager;
 import com.heimdallauth.server.exceptions.GroupNotFound;
+import com.heimdallauth.server.models.GroupAggregationModel;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
@@ -14,6 +16,7 @@ import org.springframework.util.StringUtils;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleDataManager {
@@ -66,6 +69,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
     @Override
     public GroupModel createGroup(GroupModel groupModel) {
         GroupDocument documentToSave = convertGroupModelToGroupDocument(groupModel);
+        documentToSave.setId(UUID.randomUUID().toString());
         GroupDocument savedDocument = this.mongoTemplate.save(documentToSave, COLLECTION_GROUPS);
         return this.getGroup(savedDocument.getId()).orElseThrow(() -> new GroupNotFound("The group not found", savedDocument.getId()));
     }
@@ -88,18 +92,13 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
 
     @Override
     public Optional<GroupModel> getGroup(String groupId) {
-        Query selectGroupById = Query.query(Criteria.where("id").is(groupId));
-        Query selectGroupRoleMemberships = Query.query(Criteria.where("groupId").is(groupId));
-        Optional<GroupDocument> groupDocumentSelected = this.mongoTemplate.find(selectGroupById, GroupDocument.class, COLLECTION_GROUPS).stream().findFirst();
-        List<GroupRoleMembershipDocument> groupRoleMembershipDocuments = this.mongoTemplate.find(selectGroupRoleMemberships, GroupRoleMembershipDocument.class, COLLECTION_GROUP_ROLE_MEMBERSHIPS);
-        List<RoleModel> roles = this.getRolesByIds(groupRoleMembershipDocuments.stream().map(GroupRoleMembershipDocument::getRoleId).toList());
-        return groupDocumentSelected.map(groupDocument -> GroupModel.builder()
-                .id(groupDocument.getId())
-                .groupName(groupDocument.getGroupName())
-                .groupDescription(groupDocument.getGroupDescription())
-                .tenantId(groupDocument.getTenantId())
-                .roles(roles)
-                .build());
+        Aggregation mongoGroupSelectionAggregationPipeline = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("_id").is(groupId)),
+                Aggregation.lookup(COLLECTION_GROUP_ROLE_MEMBERSHIPS, "_id", "groupId", "rolesId"),
+                Aggregation.lookup(ROLES_COLLECTION, "rolesId.roleId", "_id", "roles")
+        );
+        GroupAggregationModel aggregationResults = this.mongoTemplate.aggregate(mongoGroupSelectionAggregationPipeline, COLLECTION_GROUPS, GroupAggregationModel.class).getUniqueMappedResult();
+        return Optional.ofNullable(aggregationResults).map(GroupAggregationModel::toGroupModel);
     }
 
     @Override
@@ -155,10 +154,12 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
 
     @Override
     public List<GroupModel> getAllGroups() {
-        List<GroupDocument> allGroups = this.mongoTemplate.findAll(GroupDocument.class, COLLECTION_GROUPS);
-        return allGroups.stream()
-                .map(GroupRoleDataManagerMongoImpl::convertGroupDocumentToGroupModel)
-                .toList();
+        Aggregation mongoGroupSelectionAggregationPipeline = Aggregation.newAggregation(
+                Aggregation.lookup(COLLECTION_GROUP_ROLE_MEMBERSHIPS, "_id", "groupId", "rolesId"),
+                Aggregation.lookup(ROLES_COLLECTION, "rolesId.roleId", "_id", "roles")
+        );
+        List<GroupAggregationModel> aggregationResults = this.mongoTemplate.aggregate(mongoGroupSelectionAggregationPipeline, COLLECTION_GROUPS, GroupAggregationModel.class).getMappedResults();
+        return aggregationResults.stream().map(GroupAggregationModel::toGroupModel).toList();
     }
 
     @Override
@@ -170,6 +171,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
         List<String> filteredRoleMemberships = roleIds.stream().filter(roleId -> groupMemberships.stream().noneMatch(groupRoleMembershipDocument -> groupRoleMembershipDocument.getRoleId().equals(roleId))).toList();
         List<GroupRoleMembershipDocument> newRoleMemberships = filteredRoleMemberships.stream()
                 .map(roleId -> GroupRoleMembershipDocument.builder()
+                        .membershipId(UUID.randomUUID().toString())
                         .groupId(groupId)
                         .roleId(roleId)
                         .createdOn(Instant.now())
@@ -183,6 +185,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
     @Override
     public RoleModel createRole(String roleName, String roleDescription) {
         RoleDocument roleDocumentToSave = RoleDocument.builder()
+                .id(UUID.randomUUID().toString())
                 .roleName(roleName)
                 .roleDescription(roleDescription)
                 .createdOn(Instant.now())
