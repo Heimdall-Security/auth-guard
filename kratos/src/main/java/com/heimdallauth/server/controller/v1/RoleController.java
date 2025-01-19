@@ -24,4 +24,8 @@ public class RoleController {
     public ResponseEntity<List<RoleModel>> getAllRoles(){
         return ResponseEntity.ok(this.roleControllerService.getAllRoles());
     }
+    @GetMapping("/{roleId}")
+    public ResponseEntity<RoleModel> getRoleById(@PathVariable("roleId") String roleId){
+        return ResponseEntity.ok(this.roleControllerService.getRoleById(roleId));
+    }
 }
