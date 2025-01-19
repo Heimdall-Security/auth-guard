@@ -87,8 +87,19 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
     }
 
     @Override
-    public GroupModel getGroup(String groupId) {
-        return null;
+    public Optional<GroupModel> getGroup(String groupId) {
+        Query selectGroupById = Query.query(Criteria.where("id").is(groupId));
+        Query selectGroupRoleMemberships = Query.query(Criteria.where("groupId").is(groupId));
+        Optional<GroupDocument> groupDocumentSelected = this.mongoTemplate.find(selectGroupById, GroupDocument.class, COLLECTION_GROUPS).stream().findFirst();
+        List<GroupRoleMembershipDocument> groupRoleMembershipDocuments = this.mongoTemplate.find(selectGroupRoleMemberships, GroupRoleMembershipDocument.class, COLLECTION_GROUP_ROLE_MEMBERSHIPS);
+        List<RoleModel> roles = this.getRolesByIds(groupRoleMembershipDocuments.stream().map(GroupRoleMembershipDocument::getRoleId).toList());
+        return groupDocumentSelected.map(groupDocument -> GroupModel.builder()
+                .id(groupDocument.getId())
+                .groupName(groupDocument.getGroupName())
+                .groupDescription(groupDocument.getGroupDescription())
+                .tenantId(groupDocument.getTenantId())
+                .roles(roles)
+                .build());
     }
 
     @Override
@@ -166,8 +177,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
                         .build())
                 .toList();
         this.mongoTemplate.insert(newRoleMemberships, COLLECTION_GROUP_ROLE_MEMBERSHIPS);
-        GroupDocument updatedGroupDocument  = Optional.ofNullable(this.mongoTemplate.findOne(selectGroupQuery, GroupDocument.class, COLLECTION_GROUPS)).orElseThrow(() -> new GroupNotFound("The group not found", groupId));
-        return convertGroupDocumentToGroupModel(updatedGroupDocument);
+        return this.getGroup(groupId).orElseThrow(() -> new GroupNotFound("The group not found", groupId));
     }
 
     @Override
