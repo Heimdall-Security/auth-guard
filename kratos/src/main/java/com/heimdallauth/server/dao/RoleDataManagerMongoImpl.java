@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -52,7 +53,7 @@ public class RoleDataManagerMongoImpl implements RoleDataManager {
     }
 
     @Override
-    public Optional<RoleModel> getRole(String roleId) {
+    public Optional<RoleModel> getRoleById(String roleId) {
         Query selectRoleFromId = Query.query(Criteria.where("id").is(roleId));
         return Optional.ofNullable(mongoTemplate.findOne(selectRoleFromId, RoleDocument.class, ROLES_COLLECTION)).map(RoleDataManagerMongoImpl::convertToRoleModel);
     }
@@ -66,5 +67,10 @@ public class RoleDataManagerMongoImpl implements RoleDataManager {
     @Override
     public Optional<RoleModel> updateRole(String roleId, String roleName, String roleDescription) {
         return Optional.empty();
+    }
+
+    @Override
+    public List<RoleModel> getAllRoles() {
+        return this.mongoTemplate.findAll(RoleDocument.class, ROLES_COLLECTION).stream().map(RoleDataManagerMongoImpl::convertToRoleModel).toList();
     }
 }
