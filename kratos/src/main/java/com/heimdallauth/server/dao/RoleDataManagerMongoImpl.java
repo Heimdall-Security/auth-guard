@@ -59,6 +59,12 @@ public class RoleDataManagerMongoImpl implements RoleDataManager {
     }
 
     @Override
+    public List<RoleModel> getRolesByIds(List<String> ids) {
+        Query selectRolesByIds = Query.query(Criteria.where("id").in(ids));
+        return mongoTemplate.find(selectRolesByIds, RoleDocument.class, ROLES_COLLECTION).stream().map(RoleDataManagerMongoImpl::convertToRoleModel).toList();
+    }
+
+    @Override
     public Optional<RoleModel> searchRoleUsingRoleNameOrRoleDescription(String searchTerm) {
         Query searchQuery = Query.query(Criteria.where("roleName").regex(searchTerm, "i").orOperator(Criteria.where("roleDescription").regex(searchTerm,"i")));
         return Optional.ofNullable(mongoTemplate.findOne(searchQuery, RoleDocument.class, ROLES_COLLECTION)).map(RoleDataManagerMongoImpl::convertToRoleModel);
