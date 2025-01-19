@@ -1,7 +1,9 @@
 package com.heimdallauth.server.dao;
 
-import com.heimdallauth.server.datamanagers.GroupDataManager;
 import com.heimdallauth.server.commons.models.GroupModel;
+import com.heimdallauth.server.datamanagers.GroupDataManager;
+import com.heimdallauth.server.exceptions.GroupNotFound;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -15,6 +17,7 @@ import java.util.Optional;
 public class GroupsMongoDataManager implements GroupDataManager {
     private final MongoTemplate mongoTemplate;
     private static final String COLLECTION_GROUPS = "groups-collection";
+    private static final String COLLECTION_GROUP_ROLE_MEMBERSHIPS = "group-role-memberships-collection";
 
     public GroupsMongoDataManager(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
@@ -122,5 +125,23 @@ public class GroupsMongoDataManager implements GroupDataManager {
         return allGroups.stream()
                 .map(GroupsMongoDataManager::convertGroupDocumentToGroupModel)
                 .toList();
+    }
+
+    @Override
+    public GroupModel updateGroupRoleMapping(String groupId, List<String> roleIds) {
+        Query selectGroupQuery = Query.query(Criteria.where("id").is(groupId));
+        Query selectionRoleMembershipQuery = Query.query(Criteria.where("groupId").is(groupId));
+        GroupDocument groupDocument = Optional.ofNullable(this.mongoTemplate.findOne(selectGroupQuery, GroupDocument.class, COLLECTION_GROUPS)).orElseThrow(() -> new GroupNotFound("The group not found", groupId));
+        List<GroupRoleMembershipDocument> groupMemberships = this.mongoTemplate.find(selectionRoleMembershipQuery, GroupRoleMembershipDocument.class, COLLECTION_GROUP_ROLE_MEMBERSHIPS);
+        List<String> filteredRoleMemberships = roleIds.stream().filter(roleId -> groupMemberships.stream().noneMatch(groupRoleMembershipDocument -> groupRoleMembershipDocument.getRoleId().equals(roleId))).toList();
+        List<GroupRoleMembershipDocument> newRoleMemberships = filteredRoleMemberships.stream()
+                .map(roleId -> GroupRoleMembershipDocument.builder()
+                        .groupId(groupId)
+                        .roleId(roleId)
+                        .build())
+                .toList();
+        this.mongoTemplate.insert(newRoleMemberships, COLLECTION_GROUP_ROLE_MEMBERSHIPS);
+        GroupDocument updatedGroupDocument  = Optional.ofNullable(this.mongoTemplate.findOne(selectGroupQuery, GroupDocument.class, COLLECTION_GROUPS)).orElseThrow(() -> new GroupNotFound("The group not found", groupId));
+        return convertGroupDocumentToGroupModel(updatedGroupDocument);
     }
 }

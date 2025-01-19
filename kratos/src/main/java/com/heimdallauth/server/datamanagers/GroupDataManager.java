@@ -20,4 +20,5 @@ public interface GroupDataManager {
     List<String> getGroupMembers(String groupId);
     Optional<GroupModel> searchGroup(String searchTerm);
     List<GroupModel> getAllGroups();
+    GroupModel updateGroupRoleMapping(String groupId, List<String> roleIds);
 }
