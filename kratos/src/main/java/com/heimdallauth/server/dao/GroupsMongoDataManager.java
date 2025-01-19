@@ -3,13 +3,13 @@ package com.heimdallauth.server.dao;
 import com.heimdallauth.server.commons.models.GroupModel;
 import com.heimdallauth.server.datamanagers.GroupDataManager;
 import com.heimdallauth.server.exceptions.GroupNotFound;
-import org.springframework.core.PriorityOrdered;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +25,7 @@ public class GroupsMongoDataManager implements GroupDataManager {
 
     public static GroupModel convertGroupDocumentToGroupModel(GroupDocument groupDocument) {
         return GroupModel.builder()
+                .id(StringUtils.hasLength(groupDocument.getId()) ? groupDocument.getId() : null)
                 .groupName(groupDocument.getGroupName())
                 .groupDescription(groupDocument.getGroupDescription())
                 .tenantId(groupDocument.getTenantId())
@@ -138,6 +139,8 @@ public class GroupsMongoDataManager implements GroupDataManager {
                 .map(roleId -> GroupRoleMembershipDocument.builder()
                         .groupId(groupId)
                         .roleId(roleId)
+                        .createdOn(Instant.now())
+                        .lastUpdatedOn(Instant.now())
                         .build())
                 .toList();
         this.mongoTemplate.insert(newRoleMemberships, COLLECTION_GROUP_ROLE_MEMBERSHIPS);
