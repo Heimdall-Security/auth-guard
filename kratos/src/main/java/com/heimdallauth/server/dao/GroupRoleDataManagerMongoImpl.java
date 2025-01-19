@@ -222,4 +222,11 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
     public List<RoleModel> getAllRoles() {
         return this.mongoTemplate.findAll(RoleDocument.class, ROLES_COLLECTION).stream().map(GroupRoleDataManagerMongoImpl::convertToRoleModel).toList();
     }
+
+    @Override
+    public void deleteRoleById(String roleId) {
+        List<GroupMembershipDocument> groupMemberships = this.mongoTemplate.find(Query.query(Criteria.where("roleId").is(roleId)), GroupMembershipDocument.class);
+        this.mongoTemplate.remove(Query.query(Criteria.where("roleId").is(roleId)), GroupRoleMembershipDocument.class);
+        this.mongoTemplate.remove(Query.query(Criteria.where("id").is(roleId)), RoleDocument.class);
+    }
 }
