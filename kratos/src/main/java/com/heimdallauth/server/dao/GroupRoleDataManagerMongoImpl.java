@@ -238,7 +238,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
         try {
             Aggregation mongoRoleToGroupAggregation = Aggregation.newAggregation(
                     Aggregation.match(Criteria.where("_id").is(roleId)),
-                    Aggregation.lookup(COLLECTION_GROUP_ROLE_MEMBERSHIPS, "_id", "roleId", "groupRoleMemberships")
+                    Aggregation.lookup(GROUP_ROLE_MEMBERSHIP_COLLECTION, "_id", "roleId", "groupRoleMemberships")
 
             );
             Optional<RolesToGroupAggregationModel> roleGroupAggregationResults = Optional.ofNullable(this.mongoTemplate.aggregate(mongoRoleToGroupAggregation, ROLES_COLLECTION, RolesToGroupAggregationModel.class).getUniqueMappedResult());
@@ -252,7 +252,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
             if (forceDelete) {
                 log.debug("Triggering force delete for role with id: {}, groupIds: {}", roleId, e.ids);
                 Query groupRoleMembershipDeleteQuery = Query.query(Criteria.where("roleId").is(roleId));
-                DeleteResult mongoGroupMembershipDeleteOperationResponse = triggerDelete(groupRoleMembershipDeleteQuery, COLLECTION_GROUP_ROLE_MEMBERSHIPS, GroupRoleMembershipDocument.class);
+                DeleteResult mongoGroupMembershipDeleteOperationResponse = triggerDelete(groupRoleMembershipDeleteQuery, GROUP_ROLE_MEMBERSHIP_COLLECTION, GroupRoleMembershipDocument.class);
                 DeleteResult mongoDeleteOperationResponse = triggerDelete(roleCollectionDeleteQuery, ROLES_COLLECTION, RoleDocument.class);
                 log.info("Force delete operation complete");
             } else {
