@@ -17,15 +17,17 @@ public class RoleController {
     }
 
     @PostMapping("/role")
-    public ResponseEntity<RoleModel> createNewRole(@RequestBody RoleModel createRolePayload){
+    public ResponseEntity<RoleModel> createNewRole(@RequestBody RoleModel createRolePayload) {
         return ResponseEntity.ok(this.roleControllerService.createNewRole(createRolePayload));
     }
+
     @GetMapping
-    public ResponseEntity<List<RoleModel>> getAllRoles(){
+    public ResponseEntity<List<RoleModel>> getAllRoles() {
         return ResponseEntity.ok(this.roleControllerService.getAllRoles());
     }
+
     @GetMapping("/{roleId}")
-    public ResponseEntity<RoleModel> getRoleById(@PathVariable("roleId") String roleId){
+    public ResponseEntity<RoleModel> getRoleById(@PathVariable("roleId") String roleId) {
         return ResponseEntity.ok(this.roleControllerService.getRoleById(roleId));
     }
 }

@@ -16,8 +16,8 @@ import java.util.Optional;
 @Repository
 @Slf4j
 public class UserProfileMongoDataManagerImpl implements UserProfileDataManager {
-    private final MongoTemplate mongoTemplate;
     private static final String USER_PROFILE_COLLECTION_NAME = "user_profile_collection";
+    private final MongoTemplate mongoTemplate;
 
     public UserProfileMongoDataManagerImpl(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
@@ -36,7 +36,8 @@ public class UserProfileMongoDataManagerImpl implements UserProfileDataManager {
                 .lastUpdatedOn(userProfileDocument.getLastUpdatedTimestamp())
                 .build();
     }
-    private static UserProfileDocument convertToUserProfileDocument(UserProfileModel userProfileModel){
+
+    private static UserProfileDocument convertToUserProfileDocument(UserProfileModel userProfileModel) {
         return UserProfileDocument.builder()
                 .id(userProfileModel.getId())
                 .username(userProfileModel.getUsername())
@@ -49,6 +50,7 @@ public class UserProfileMongoDataManagerImpl implements UserProfileDataManager {
                 .lastUpdatedTimestamp(userProfileModel.getLastUpdatedOn())
                 .build();
     }
+
     @Override
     public UserProfileModel createNewUserProfile(String username, String emailAddress, String firstName, String lastName, String phoneNumber) {
         UserProfileDocument profileDocumentToSave = UserProfileDocument.builder()
@@ -86,7 +88,7 @@ public class UserProfileMongoDataManagerImpl implements UserProfileDataManager {
 
     @Override
     public Optional<UserProfileModel> searchUserProfileWithUsernameOrEmailAddress(String username, String emailAddress) {
-        Query searchQuery = Query.query(Criteria.where("username").regex(username,"i").orOperator(Criteria.where("emailAddress").regex(emailAddress,"i")));
+        Query searchQuery = Query.query(Criteria.where("username").regex(username, "i").orOperator(Criteria.where("emailAddress").regex(emailAddress, "i")));
         return Optional.ofNullable(this.mongoTemplate.findOne(searchQuery, UserProfileDocument.class, USER_PROFILE_COLLECTION_NAME)).map(UserProfileMongoDataManagerImpl::convertToUserProfileModel);
     }
 

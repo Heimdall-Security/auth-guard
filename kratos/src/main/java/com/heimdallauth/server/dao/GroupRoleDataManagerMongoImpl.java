@@ -12,7 +12,6 @@ import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
@@ -34,7 +33,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
         this.mongoTemplate = mongoTemplate;
     }
 
-    private static RoleDocument convertToRoleDocument(RoleModel roleModel){
+    private static RoleDocument convertToRoleDocument(RoleModel roleModel) {
         return RoleDocument.builder()
                 .id(roleModel.getId())
                 .roleName(roleModel.getRoleName())
@@ -43,7 +42,8 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
                 .lastUpdatedOn(roleModel.getLastUpdatedOn())
                 .build();
     }
-    private static RoleModel convertToRoleModel(RoleDocument roleDocument){
+
+    private static RoleModel convertToRoleModel(RoleDocument roleDocument) {
         return RoleModel.builder()
                 .id(roleDocument.getId())
                 .roleName(roleDocument.getRoleName())
@@ -62,9 +62,10 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
                 .roles(List.of())
                 .build();
     }
+
     public static GroupDocument convertGroupModelToGroupDocument(GroupModel groupModel) {
         return GroupDocument.builder()
-                .id(StringUtils.hasLength(groupModel.getId()) ? groupModel.getId() : null )
+                .id(StringUtils.hasLength(groupModel.getId()) ? groupModel.getId() : null)
                 .groupName(groupModel.getGroupName())
                 .groupDescription(groupModel.getGroupDescription())
                 .tenantId(groupModel.getTenantId())
@@ -95,7 +96,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
         return null;
     }
 
-    private GroupAggregationModel getAggregatedGroupFromGroupId(String groupId){
+    private GroupAggregationModel getAggregatedGroupFromGroupId(String groupId) {
         Aggregation mongoGroupSelectionAggregationPipeline = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("_id").is(groupId)),
                 Aggregation.lookup(GROUP_ROLE_MEMBERSHIP_COLLECTION, "_id", "groupId", "rolesId"),
@@ -103,6 +104,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
         );
         return this.mongoTemplate.aggregate(mongoGroupSelectionAggregationPipeline, GROUPS_COLLECTION, GroupAggregationModel.class).getUniqueMappedResult();
     }
+
     @Override
     public Optional<GroupModel> getGroup(String groupId) {
         GroupAggregationModel aggregationResults = getAggregatedGroupFromGroupId(groupId);
@@ -212,7 +214,7 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
 
     @Override
     public Optional<RoleModel> searchRoleUsingRoleNameOrRoleDescription(String searchTerm) {
-        Query searchQuery = Query.query(Criteria.where("roleName").regex(searchTerm, "i").orOperator(Criteria.where("roleDescription").regex(searchTerm,"i")));
+        Query searchQuery = Query.query(Criteria.where("roleName").regex(searchTerm, "i").orOperator(Criteria.where("roleDescription").regex(searchTerm, "i")));
         return Optional.ofNullable(mongoTemplate.findOne(searchQuery, RoleDocument.class, ROLES_COLLECTION)).map(GroupRoleDataManagerMongoImpl::convertToRoleModel);
     }
 
@@ -242,18 +244,18 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
             Optional<RolesToGroupAggregationModel> roleGroupAggregationResults = Optional.ofNullable(this.mongoTemplate.aggregate(mongoRoleToGroupAggregation, ROLES_COLLECTION, RolesToGroupAggregationModel.class).getUniqueMappedResult());
             if (roleGroupAggregationResults.isPresent() && !roleGroupAggregationResults.get().getGroupRoleMembership().isEmpty()) {
                 throw new RoleMappingExists("The role is mapped to a group", "groups", roleGroupAggregationResults.get().getGroupRoleMembership().stream().map(GroupMembershipDocument::getGroupId).toList());
-            }else{
+            } else {
                 DeleteResult mongoDeleteOperationResponse = triggerDelete(roleCollectionDeleteQuery, ROLES_COLLECTION, RoleDocument.class);
                 log.info("Deleted role with id: {}, deletedRowCount: {}", roleId, mongoDeleteOperationResponse.getDeletedCount());
             }
         } catch (RoleMappingExists e) {
-            if(forceDelete){
+            if (forceDelete) {
                 log.debug("Triggering force delete for role with id: {}, groupIds: {}", roleId, e.ids);
                 Query groupRoleMembershipDeleteQuery = Query.query(Criteria.where("roleId").is(roleId));
                 DeleteResult mongoGroupMembershipDeleteOperationResponse = triggerDelete(groupRoleMembershipDeleteQuery, COLLECTION_GROUP_ROLE_MEMBERSHIPS, GroupRoleMembershipDocument.class);
                 DeleteResult mongoDeleteOperationResponse = triggerDelete(roleCollectionDeleteQuery, ROLES_COLLECTION, RoleDocument.class);
                 log.info("Force delete operation complete");
-            }else{
+            } else {
                 throw e;
             }
         }

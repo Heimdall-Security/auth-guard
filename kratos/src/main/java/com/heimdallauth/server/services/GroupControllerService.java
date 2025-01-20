@@ -20,6 +20,7 @@ public class GroupControllerService {
         this.groupDM = groupDM;
         this.roleDM = roleDM;
     }
+
     public GroupModel createNewGroup(CreateDirectoryGroup createDirectoryGroup) {
         return groupDM.createGroup(
                 GroupModel.builder()
@@ -28,6 +29,7 @@ public class GroupControllerService {
                         .build()
         );
     }
+
     public List<GroupModel> getAllGroups() {
         return groupDM.getAllGroups();
     }

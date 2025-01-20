@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: ['jfk-gateway','kratos']
+        image: [ 'jfk-gateway','kratos' ]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
