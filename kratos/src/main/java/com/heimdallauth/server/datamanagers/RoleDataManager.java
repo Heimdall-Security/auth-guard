@@ -12,5 +12,5 @@ public interface RoleDataManager {
     Optional<RoleModel> searchRoleUsingRoleNameOrRoleDescription(String searchTerm);
     Optional<RoleModel> updateRole(String roleId, String roleName, String roleDescription);
     List<RoleModel> getAllRoles();
-    void deleteRoleById(String roleId);
+    void deleteRoleById(String roleId, boolean forceDelete);
 }
