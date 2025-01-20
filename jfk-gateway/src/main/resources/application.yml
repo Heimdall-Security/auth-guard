@@ -9,3 +9,7 @@ spring:
             uri: lb://kratos
             predicates:
               - Path=/api/kratos/**
+          - id: bifrost
+            uri: lb://bifrost
+            predicates:
+              - Path=/api/bifrost/**
