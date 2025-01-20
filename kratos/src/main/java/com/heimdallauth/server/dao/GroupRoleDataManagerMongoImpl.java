@@ -225,8 +225,9 @@ public class GroupRoleDataManagerMongoImpl implements GroupDataManager, RoleData
 
     @Override
     public void deleteRoleById(String roleId) {
-        List<GroupMembershipDocument> groupMemberships = this.mongoTemplate.find(Query.query(Criteria.where("roleId").is(roleId)), GroupMembershipDocument.class);
-        this.mongoTemplate.remove(Query.query(Criteria.where("roleId").is(roleId)), GroupRoleMembershipDocument.class);
-        this.mongoTemplate.remove(Query.query(Criteria.where("id").is(roleId)), RoleDocument.class);
+        Query groupMembershipDeleteQuery = Query.query(Criteria.where("roleId").is(roleId));
+        Query roleIdDeleteQuery = Query.query(Criteria.where("id").is(roleId));
+        this.mongoTemplate.remove(groupMembershipDeleteQuery, GroupRoleMembershipDocument.class);
+        this.mongoTemplate.remove(roleIdDeleteQuery, RoleDocument.class);
     }
 }
