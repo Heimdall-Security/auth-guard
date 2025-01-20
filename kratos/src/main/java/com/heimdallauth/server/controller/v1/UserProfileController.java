@@ -24,8 +24,9 @@ public class UserProfileController {
     public ResponseEntity<List<UserProfileModel>> searchUserProfile(@RequestParam("searchTerm") String searchTerm) {
         return ResponseEntity.ok(this.userProfileService.searchUserProfile(searchTerm));
     }
+
     @PostMapping("/profiles/create")
-    public ResponseEntity<UserProfileModel> createNewUserProfile(@RequestBody UserProfileModel userProfileModel){
+    public ResponseEntity<UserProfileModel> createNewUserProfile(@RequestBody UserProfileModel userProfileModel) {
         return ResponseEntity.ok(this.userProfileService.provisionUserProfile(userProfileModel));
     }
 

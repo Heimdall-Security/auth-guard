@@ -3,7 +3,6 @@ package com.heimdallauth.server.commons.models;
 import lombok.*;
 
 import java.time.Instant;
-import java.util.Map;
 
 @Builder
 @NoArgsConstructor

@@ -23,7 +23,7 @@ public class GroupAggregationModel {
     private List<GroupMembershipDocument> rolesId;
     private List<RoleDocument> roles;
 
-    public GroupModel toGroupModel(){
+    public GroupModel toGroupModel() {
         return GroupModel.builder()
                 .id(this.id)
                 .groupName(this.groupName)

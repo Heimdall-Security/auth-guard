@@ -23,10 +23,12 @@ public class RoleControllerService {
                 createRolePayload.getRoleDescription()
         );
     }
-    public List<RoleModel> getAllRoles(){
+
+    public List<RoleModel> getAllRoles() {
         return roleDM.getAllRoles();
     }
-    public RoleModel getRoleById(String roleId){
+
+    public RoleModel getRoleById(String roleId) {
         return roleDM.getRoleById(roleId).orElseThrow(() -> new RoleNotFound("Role not found", roleId));
     }
 }

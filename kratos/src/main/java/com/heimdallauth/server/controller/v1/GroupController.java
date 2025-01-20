@@ -22,16 +22,19 @@ public class GroupController {
     public ResponseEntity<GroupModel> createGroup(@RequestBody CreateDirectoryGroup createDirectoryGroupPayload) {
         return ResponseEntity.ok(this.groupControllerService.createNewGroup(createDirectoryGroupPayload));
     }
+
     @GetMapping
     public ResponseEntity<List<GroupModel>> getAllAvailableGroups() {
         return ResponseEntity.ok(this.groupControllerService.getAllGroups());
     }
+
     @PutMapping("/{groupId}/roles")
-    public ResponseEntity<GroupModel> updateGroupRoleMapping(@PathVariable("groupId") String groupId, @RequestBody CreateRoleMappingWithGroup roleMappingWithGroup){
+    public ResponseEntity<GroupModel> updateGroupRoleMapping(@PathVariable("groupId") String groupId, @RequestBody CreateRoleMappingWithGroup roleMappingWithGroup) {
         return ResponseEntity.ok(this.groupControllerService.updateGroupRoleMapping(groupId, roleMappingWithGroup.getRolesId()));
     }
+
     @PutMapping("/{groupId}/bulkRoles")
-    public ResponseEntity<List<GroupModel>> updateBulkGroupRoleMappings(@RequestBody List<CreateRoleMappingWithGroup> roleMappings){
+    public ResponseEntity<List<GroupModel>> updateBulkGroupRoleMappings(@RequestBody List<CreateRoleMappingWithGroup> roleMappings) {
 //        return ResponseEntity.ok(this.groupControllerService.updateBulkGroupRoleMappings(roleMappings));
         return ResponseEntity.ok().build();
     }
