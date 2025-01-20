@@ -1,0 +1,15 @@
+server:
+  port: 0
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+  cloud:
+    config:
+      enabled: false
+    discovery:
+      enabled: true
+    consul:
+      port: 8500
+      host: localhost
