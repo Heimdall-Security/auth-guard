@@ -4,20 +4,23 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-import static com.heimdallauth.server.constants.MongoCollectionConstants.GROUP_ROLE_MEMBERSHIP_COLLECTION;
+import java.time.Instant;
 
-@Document(collection = GROUP_ROLE_MEMBERSHIP_COLLECTION)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class GroupMembershipDocument {
+@Document
+public class GroupRoleMembershipDocument {
     @Id
-    private String id;
+    @Field("membershipId")
+    private String membershipId;
     @Indexed
     private String groupId;
-    @Indexed
-    private String memberId;
+    private String roleId;
+    private Instant createdOn;
+    private Instant lastUpdatedOn;
 }

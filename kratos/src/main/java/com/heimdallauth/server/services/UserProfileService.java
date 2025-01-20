@@ -19,12 +19,13 @@ public class UserProfileService {
         this.userProfileDataManager = userProfileDataManager;
     }
 
-    public UserProfileModel provisionUserProfile(UserProfileModel userProfileModel){
+    public UserProfileModel provisionUserProfile(UserProfileModel userProfileModel) {
         return provisionUserProfile(UserLifecycleStage.PROVISIONED, userProfileModel);
     }
+
     public UserProfileModel provisionUserProfile(UserLifecycleStage lifecycleStage, UserProfileModel userProfileModel) {
         boolean proceed = this.userProfileDataManager.searchUserProfileWithUsernameOrEmailAddress(userProfileModel.getUsername(), userProfileModel.getEmailAddress()).isEmpty();
-        if(proceed){
+        if (proceed) {
             log.info("Provisioning user profile for user: Username: {}, Email:{}", userProfileModel.getUsername(), userProfileModel.getEmailAddress());
             UserProfileModel createdUserProfile = userProfileDataManager.createNewUserProfile(
                     userProfileModel.getUsername(),
@@ -38,7 +39,7 @@ public class UserProfileService {
                 updateLifecycleStage(createdUserProfile.getId(), lifecycleStage);
             }
             return createdUserProfile;
-        }else{
+        } else {
             throw new UserProfileAlreadyExist("The user profile with username or email already exist");
         }
     }
@@ -46,6 +47,7 @@ public class UserProfileService {
     public List<UserProfileModel> searchUserProfile(String searchTerm) {
         return this.userProfileDataManager.searchUserProfile(searchTerm);
     }
+
     public void updateLifecycleStage(String profileId, UserLifecycleStage lifecycleStage) {
         UserProfileModel currentUserProfile = this.userProfileDataManager.getUserProfileById(profileId).orElseThrow(() -> new UserProfileNotFound("User profile not found"));
         currentUserProfile.setLifecycleStage(lifecycleStage);

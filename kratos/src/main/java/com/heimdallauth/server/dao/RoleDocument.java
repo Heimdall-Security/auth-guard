@@ -6,7 +6,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
-@Document
+import static com.heimdallauth.server.constants.MongoCollectionConstants.ROLES_COLLECTION;
+
+@Document(collection = ROLES_COLLECTION)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
