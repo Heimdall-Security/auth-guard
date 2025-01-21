@@ -3,6 +3,7 @@ description: Request an enhancement to an existing feature
 assignees:
   - 'mayanksoni1996'
 title: "[ENHANCEMENT]"
+type: "feature"
 labels: [ "enhancement", "triage" ]
 body:
   - type: textarea
