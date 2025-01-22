@@ -1,9 +1,10 @@
 package com.heimdallauth.server.documents;
 
+import com.heimdallauth.server.constants.MongoCollectionConstants;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document
+@Document(collection = MongoCollectionConstants.TRACKING_OPTIONS_COLLECTION)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -4,10 +4,12 @@ import com.heimdallauth.server.commons.models.bifrost.ConfigurationSet;
 import com.heimdallauth.server.commons.models.bifrost.EmailSuppressionList;
 import com.heimdallauth.server.datamanagers.ConfigurationSetDataManager;
 import com.heimdallauth.server.datamanagers.EmailSuppressionListDataManager;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDataManager, EmailSuppressionListDataManager {
     @Override
     public ConfigurationSet createConfigurationSet(ConfigurationSet configurationSet) {
