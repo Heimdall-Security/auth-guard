@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v1/configuration-set-management")
+@Tag(name = "Configuration Set Management", description = "APIs for managing configuration sets")
 public class ConfigurationSetManagementController {
     private final ConfigurationSetManagementService configurationSetManagementService;
 
