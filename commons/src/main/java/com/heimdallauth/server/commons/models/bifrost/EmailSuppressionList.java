@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 public class EmailSuppressionList {
+    private String id;
     private String suppressionListName;
     private Instant creationTimestamp;
     private Instant lastUpdateTimestamp;
