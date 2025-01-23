@@ -170,6 +170,7 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
     public Optional<EmailSuppressionList> getEmailSuppressionListById(String suppressionListId) {
         Query emailSuppressionListQuery = Query.query(Criteria.where("_id").is(suppressionListId));
         return Optional.ofNullable(this.mongoTemplate.findOne(emailSuppressionListQuery, EmailSuppressionListDocument.class, MongoCollectionConstants.EMAIL_SUPPRESSION_LIST_COLLECTION)).map(suppressionDocument -> EmailSuppressionList.builder()
+                .id(suppressionDocument.getId())
                 .suppressionListName(suppressionDocument.getSuppressionListName())
                 .emailSuppressions(suppressionDocument.getEmailSuppressions())
                 .creationTimestamp(suppressionDocument.getCreationTimestamp())

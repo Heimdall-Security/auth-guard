@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ConfigurationSet {
+    private String id;
     private String configurationSetName;
     private List<EmailSuppressionList> activeEmailSuppressionLists;
     private TrackingOptions trackingOptions;
