@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.InvocationTargetException;
@@ -132,12 +133,13 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
 
     @Override
     public Optional<EmailSuppressionList> getEmailSuppressionListById(String suppressionListId) {
-        Aggregation emailSuppressionListAggregation = Aggregation.newAggregation(
-                Aggregation.match(Criteria.where("_id").is(suppressionListId)),
-                Aggregation.lookup(MongoCollectionConstants.EMAIL_ENTRY_COLLECTION, "emailSuppressionEntryIds", "_id", "emailSuppressions")
-        );
-        AggregationResults<EmailSuppressionList> emailSuppressionListAggregationResults = this.mongoTemplate.aggregate(emailSuppressionListAggregation, MongoCollectionConstants.EMAIL_SUPPRESSION_LIST_COLLECTION, EmailSuppressionList.class);
-        return Optional.ofNullable(emailSuppressionListAggregationResults.getUniqueMappedResult());
+        Query emailSuppressionListQuery = Query.query(Criteria.where("_id").is(suppressionListId));
+        return Optional.ofNullable(this.mongoTemplate.findOne(emailSuppressionListQuery, EmailSuppressionListDocument.class, MongoCollectionConstants.EMAIL_SUPPRESSION_LIST_COLLECTION)).map(suppressionDocument -> EmailSuppressionList.builder()
+                .suppressionListName(suppressionDocument.getSuppressionListName())
+                .emailSuppressions(suppressionDocument.getEmailSuppressions())
+                .creationTimestamp(suppressionDocument.getCreationTimestamp())
+                .lastUpdateTimestamp(suppressionDocument.getLastUpdateTimestamp())
+                .build());
     }
 
     @Override
