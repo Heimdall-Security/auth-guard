@@ -1,7 +1,10 @@
 package com.heimdallauth.server.controller.v1;
 
+import com.heimdallauth.server.commons.dto.bifrost.CreateEmailSuppressionListDTO;
 import com.heimdallauth.server.commons.models.bifrost.ConfigurationSet;
+import com.heimdallauth.server.commons.models.bifrost.EmailSuppressionList;
 import com.heimdallauth.server.service.ConfigurationSetManagementService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +37,10 @@ public class ConfigurationSetManagementController {
             @PathVariable("configurationSetId") String configurationSetId,
             @PathVariable("suppressionListId") String suppressionListId) {
         return ResponseEntity.ok(configurationSetManagementService.addSuppressionListToConfigurationSet(configurationSetId, suppressionListId));
+    }
+    @PostMapping("/suppression-lists")
+    public ResponseEntity<EmailSuppressionList> createNewEmailSuppressionList(@RequestBody CreateEmailSuppressionListDTO payloadCreateEmailSuppressionList) {
+        return ResponseEntity.ok(configurationSetManagementService.createEmailSuppressionList(payloadCreateEmailSuppressionList));
     }
 
 }

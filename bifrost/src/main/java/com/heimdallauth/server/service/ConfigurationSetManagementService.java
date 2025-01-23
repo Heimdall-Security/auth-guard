@@ -1,6 +1,8 @@
 package com.heimdallauth.server.service;
 
+import com.heimdallauth.server.commons.dto.bifrost.CreateEmailSuppressionListDTO;
 import com.heimdallauth.server.commons.models.bifrost.ConfigurationSet;
+import com.heimdallauth.server.commons.models.bifrost.EmailSuppressionList;
 import com.heimdallauth.server.datamanagers.ConfigurationSetDataManager;
 import com.heimdallauth.server.datamanagers.EmailSuppressionListDataManager;
 import lombok.extern.slf4j.Slf4j;
@@ -32,5 +34,12 @@ public class ConfigurationSetManagementService {
     }
     public ConfigurationSet addSuppressionListToConfigurationSet(String configurationSetId, String suppressionListId) {
         return configurationSetDataManager.addSuppressionListToConfigurationSet(configurationSetId, suppressionListId).orElse(null);
+    }
+    public EmailSuppressionList createEmailSuppressionList(CreateEmailSuppressionListDTO payloadCreateEmailSuppressionList){
+        return emailSuppressionListDataManager.createEmailSuppressionList(
+                payloadCreateEmailSuppressionList.getSuppressionListName(),
+                payloadCreateEmailSuppressionList.getEmailAddresses(),
+                payloadCreateEmailSuppressionList.isEmailBlocked()
+        );
     }
 }
