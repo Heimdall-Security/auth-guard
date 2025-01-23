@@ -2,6 +2,7 @@ package com.heimdallauth.server.datamanagers.impl.mongodb;
 
 import com.heimdallauth.server.commons.models.bifrost.ConfigurationSet;
 import com.heimdallauth.server.commons.models.bifrost.EmailSuppressionList;
+import com.heimdallauth.server.commons.models.bifrost.SuppressionListEmailEntry;
 import com.heimdallauth.server.constants.MongoCollectionConstants;
 import com.heimdallauth.server.datamanagers.ConfigurationSetDataManager;
 import com.heimdallauth.server.datamanagers.EmailSuppressionListDataManager;
@@ -108,7 +109,14 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
 
     @Override
     public Optional<ConfigurationSet> getConfigurationSet(String configurationSetName) {
-        return Optional.empty();
+        Aggregation configurationSetLookupAggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("configurationSetName").is(configurationSetName)),
+                Aggregation.lookup(MongoCollectionConstants.EMAIL_SUPPRESSION_LIST_COLLECTION, "activeEmailSuppressionListIds", "_id", "activeEmailSuppressionLists"),
+                Aggregation.project()
+                        .andExclude("activeEmailSuppressionListIds")
+        );
+        AggregationResults<ConfigurationSet> configurationSetAggregationResults = this.mongoTemplate.aggregate(configurationSetLookupAggregation, MongoCollectionConstants.CONFIGURATION_SET_COLLECTION, ConfigurationSet.class);
+        return Optional.ofNullable(configurationSetAggregationResults.getUniqueMappedResult());
     }
 
     @Override
@@ -118,12 +126,24 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
 
     @Override
     public List<ConfigurationSet> getAllConfigurationSets() {
-        return List.of();
+        Aggregation configurationSetLookupAggregation = Aggregation.newAggregation(
+                Aggregation.lookup(MongoCollectionConstants.EMAIL_SUPPRESSION_LIST_COLLECTION, "activeEmailSuppressionListIds", "_id", "activeEmailSuppressionLists"),
+                Aggregation.project()
+                        .andExclude("activeEmailSuppressionListIds")
+        );
+        return this.mongoTemplate.aggregate(configurationSetLookupAggregation, MongoCollectionConstants.CONFIGURATION_SET_COLLECTION, ConfigurationSet.class).getMappedResults();
     }
 
     @Override
     public EmailSuppressionList createEmailSuppressionList(String suppressionListName, List<String> emailAddresses, boolean blockDelivery) {
-        return null;
+        String suppressionListId = this.executeSaveEmailSuppressionList(EmailSuppressionList.builder()
+                        .suppressionListName(suppressionListName)
+                        .emailSuppressions(emailAddresses.stream().map(email -> SuppressionListEmailEntry.builder()
+                                .emailAddress(email)
+                                .isEmailDeliveryBlocked(blockDelivery)
+                                .build()).toList())
+                .build());
+        return this.getEmailSuppressionListById(suppressionListId).orElseThrow();
     }
 
     @Override
