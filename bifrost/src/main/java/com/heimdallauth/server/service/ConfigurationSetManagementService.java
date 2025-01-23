@@ -16,14 +16,17 @@ import java.util.List;
 public class ConfigurationSetManagementService {
     private final ConfigurationSetDataManager configurationSetDataManager;
     private final EmailSuppressionListDataManager emailSuppressionListDataManager;
+    private final ConfigurationSetValidationService configurationSetValidationService;
 
     @Autowired
-    public ConfigurationSetManagementService(ConfigurationSetDataManager configurationSetDataManager, EmailSuppressionListDataManager emailSuppressionListDataManager) {
+    public ConfigurationSetManagementService(ConfigurationSetDataManager configurationSetDataManager, EmailSuppressionListDataManager emailSuppressionListDataManager, ConfigurationSetValidationService configurationSetValidationService) {
         this.configurationSetDataManager = configurationSetDataManager;
         this.emailSuppressionListDataManager = emailSuppressionListDataManager;
+        this.configurationSetValidationService = configurationSetValidationService;
     }
 
     public ConfigurationSet createConfigurationSet(ConfigurationSet configurationSet) {
+        this.configurationSetValidationService.validateConfigurationSet(configurationSet);
         return configurationSetDataManager.createConfigurationSet(configurationSet);
     }
     public ConfigurationSet getConfigurationSetById(String configurationSetId) {
