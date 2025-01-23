@@ -10,4 +10,5 @@ public interface ConfigurationSetDataManager {
     Optional<ConfigurationSet> getConfigurationSet(String configurationSetName);
     void deleteConfigurationSet(String configurationSetId);
     List<ConfigurationSet> getAllConfigurationSets();
+    Optional<ConfigurationSet> addSuppressionListToConfigurationSet(String configurationSetId, String suppressionListId);
 }

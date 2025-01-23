@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.InvocationTargetException;
@@ -132,6 +133,20 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
                         .andExclude("activeEmailSuppressionListIds")
         );
         return this.mongoTemplate.aggregate(configurationSetLookupAggregation, MongoCollectionConstants.CONFIGURATION_SET_COLLECTION, ConfigurationSet.class).getMappedResults();
+    }
+
+    @Override
+    public Optional<ConfigurationSet> addSuppressionListToConfigurationSet(String configurationSetId, String suppressionListId) {
+        this.getConfigurationSetById(configurationSetId).ifPresentOrElse(
+                configurationSetDocument -> {
+                    Update update = new Update().addToSet("activeEmailSuppressionListIds", suppressionListId);
+                    this.mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(configurationSetId)), update, ConfigurationSetDocument.class, MongoCollectionConstants.CONFIGURATION_SET_COLLECTION);
+                },
+                () -> {
+                    throw new IllegalArgumentException("Configuration set with ID " + configurationSetId + " not found");
+                }
+        );
+        return this.getConfigurationSetById(configurationSetId);
     }
 
     @Override
