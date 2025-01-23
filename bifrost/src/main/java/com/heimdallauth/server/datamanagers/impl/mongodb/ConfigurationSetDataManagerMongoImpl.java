@@ -111,7 +111,7 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
     @Override
     public Optional<ConfigurationSet> getConfigurationSet(String configurationSetName) {
         Aggregation configurationSetLookupAggregation = Aggregation.newAggregation(
-                Aggregation.match(Criteria.where("configurationSetName").is(configurationSetName)),
+                Aggregation.match(Criteria.where("configurationSetName").regex(configurationSetName, "i")),
                 Aggregation.lookup(MongoCollectionConstants.EMAIL_SUPPRESSION_LIST_COLLECTION, "activeEmailSuppressionListIds", "_id", "activeEmailSuppressionLists"),
                 Aggregation.project()
                         .andExclude("activeEmailSuppressionListIds")
