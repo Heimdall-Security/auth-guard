@@ -20,7 +20,7 @@ public class ConfigurationSetDocument {
     private String id;
     @Indexed
     private String configurationSetName;
-    private List<String> activeEmailSuppressionLists;
+    private List<String> activeEmailSuppressionListIds;
     private String trackingOptionsId;
     private Instant creationTimestamp;
     private Instant lastUpdateTimestamp;

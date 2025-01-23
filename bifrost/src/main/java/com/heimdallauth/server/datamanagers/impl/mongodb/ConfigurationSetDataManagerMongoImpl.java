@@ -7,14 +7,17 @@ import com.heimdallauth.server.datamanagers.ConfigurationSetDataManager;
 import com.heimdallauth.server.datamanagers.EmailSuppressionListDataManager;
 import com.heimdallauth.server.documents.ConfigurationSetDocument;
 import com.heimdallauth.server.documents.EmailSuppressionListDocument;
-import com.heimdallauth.server.documents.SuppressionListEntryDocument;
 import com.heimdallauth.server.documents.TrackingOptionsDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.*;
 
 @Repository
@@ -26,22 +29,15 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
         this.mongoTemplate = mongoTemplate;
     }
 
-    private EmailSuppressionList executeSaveEmailSuppressionList(EmailSuppressionList emailSuppressionList) {
-        List<SuppressionListEntryDocument> emailSuppressions = emailSuppressionList.getEmailSuppressions().stream().map(suppressionListEntry -> SuppressionListEntryDocument.builder()
+    private String executeSaveEmailSuppressionList(EmailSuppressionList emailSuppressionList) {
+        EmailSuppressionListDocument suppressionListDocument = EmailSuppressionListDocument.builder()
                 .id(UUID.randomUUID().toString())
-                .emailAddress(suppressionListEntry.getEmailAddress())
-                .isEmailDeliveryBlocked(suppressionListEntry.isEmailDeliveryBlocked())
-                .build()).toList();
-        List<String> emailSuppressionEntriesIds = this.executeMongoDBSaveOperation(emailSuppressions, MongoCollectionConstants.EMAIL_ENTRY_COLLECTION);
-        EmailSuppressionListDocument emailSuppressionListDocument = EmailSuppressionListDocument.builder()
-                .id(UUID.randomUUID().toString())
+                .emailSuppressions(emailSuppressionList.getEmailSuppressions())
+                .creationTimestamp(Instant.now())
+                .lastUpdateTimestamp(Instant.now())
                 .suppressionListName(emailSuppressionList.getSuppressionListName())
-                .emailSuppressionEntryIds(emailSuppressionEntriesIds)
-                .creationTimestamp(emailSuppressionList.getCreationTimestamp())
-                .lastUpdateTimestamp(emailSuppressionList.getLastUpdateTimestamp())
                 .build();
-        String savedEmailSuppressionListId = this.executeMongoDBSaveOperation(List.of(emailSuppressionListDocument), MongoCollectionConstants.EMAIL_SUPPRESSION_LIST_COLLECTION).getFirst();
-        return this.getEmailSuppressionListById(savedEmailSuppressionListId).orElseThrow();
+        return this.executeMongoDBSaveOperation(List.of(suppressionListDocument), MongoCollectionConstants.EMAIL_SUPPRESSION_LIST_COLLECTION).getFirst();
     }
 
     private <T> List<String> executeMongoDBSaveOperation(List<T> objectCollection, String collectionName) {
@@ -64,7 +60,14 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
     }
 
     private Optional<ConfigurationSet> getConfigurationSetById(String configurationSetId) {
-        return Optional.empty();
+        Aggregation configurationSetLookupAggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("_id").is(configurationSetId)),
+                Aggregation.lookup(MongoCollectionConstants.EMAIL_SUPPRESSION_LIST_COLLECTION, "activeEmailSuppressionListIds", "_id", "activeEmailSuppressionLists"),
+                Aggregation.project()
+                        .andExclude("activeEmailSuppressionListIds")
+        );
+        AggregationResults<ConfigurationSet> configurationSetAggregationResults = this.mongoTemplate.aggregate(configurationSetLookupAggregation, MongoCollectionConstants.CONFIGURATION_SET_COLLECTION, ConfigurationSet.class);
+        return Optional.ofNullable(configurationSetAggregationResults.getUniqueMappedResult());
     }
     @Override
     public ConfigurationSet createConfigurationSet(ConfigurationSet configurationSet) {
@@ -75,6 +78,7 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
             throw new IllegalArgumentException("Configuration set name is required");
         }
         if (configurationSet.getTrackingOptions() != null) {
+            log.debug("Trigger save tracking options");
             //Tracking options are present and should be saved
             TrackingOptionsDocument trackingOptionsDocument = TrackingOptionsDocument.builder()
                     .customTrackingDomain(configurationSet.getTrackingOptions().getCustomTrackingDomain())
@@ -84,18 +88,20 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
         }
         if (configurationSet.getActiveEmailSuppressionLists() != null) {
             //Email suppression lists if present should be saved
+            log.debug("Trigger save active suppression lists");
             List<EmailSuppressionList> activeEmailSuppressionListForConfigurationSet = configurationSet.getActiveEmailSuppressionLists();
             for (EmailSuppressionList emailSuppressionList : activeEmailSuppressionListForConfigurationSet) {
-                EmailSuppressionList savedEmailSuppressionList = this.executeSaveEmailSuppressionList(emailSuppressionList);
-                activeSuppressionListIds.add(savedEmailSuppressionList.getId());
+                activeSuppressionListIds.add(this.executeSaveEmailSuppressionList(emailSuppressionList));
             }
         }
         ConfigurationSetDocument configurationSetDocument = ConfigurationSetDocument.builder()
+                .id(UUID.randomUUID().toString())
                 .configurationSetName(configurationSet.getConfigurationSetName())
-                .activeEmailSuppressionLists(activeSuppressionListIds)
+                .activeEmailSuppressionListIds(activeSuppressionListIds)
                 .trackingOptionsId(savedTrackingOptionsId)
                 .build();
         String savedConfigurationSetId = this.executeMongoDBSaveOperation(List.of(configurationSetDocument), MongoCollectionConstants.CONFIGURATION_SET_COLLECTION).getFirst();
+        log.debug("Saved configuration set with ID {}", savedConfigurationSetId);
         return this.getConfigurationSetById(savedConfigurationSetId).orElseThrow();
     }
 
@@ -126,7 +132,12 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
 
     @Override
     public Optional<EmailSuppressionList> getEmailSuppressionListById(String suppressionListId) {
-        return Optional.empty();
+        Aggregation emailSuppressionListAggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("_id").is(suppressionListId)),
+                Aggregation.lookup(MongoCollectionConstants.EMAIL_ENTRY_COLLECTION, "emailSuppressionEntryIds", "_id", "emailSuppressions")
+        );
+        AggregationResults<EmailSuppressionList> emailSuppressionListAggregationResults = this.mongoTemplate.aggregate(emailSuppressionListAggregation, MongoCollectionConstants.EMAIL_SUPPRESSION_LIST_COLLECTION, EmailSuppressionList.class);
+        return Optional.ofNullable(emailSuppressionListAggregationResults.getUniqueMappedResult());
     }
 
     @Override

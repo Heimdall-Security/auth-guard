@@ -1,5 +1,6 @@
 package com.heimdallauth.server.documents;
 
+import com.heimdallauth.server.commons.models.bifrost.SuppressionListEmailEntry;
 import com.heimdallauth.server.constants.MongoCollectionConstants;
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -18,7 +19,7 @@ public class EmailSuppressionListDocument {
     @Id
     private String id;
     private String suppressionListName;
-    private List<String> emailSuppressionEntryIds;
+    private List<SuppressionListEmailEntry> emailSuppressions;
     private Instant creationTimestamp;
     private Instant lastUpdateTimestamp;
 }
