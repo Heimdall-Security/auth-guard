@@ -2,6 +2,8 @@ name: Docker Matrix Builder
 
 on:
   push:
+    branches:
+      - "release-candidate/**"
     tags:
       - 'v*'
 permissions:
