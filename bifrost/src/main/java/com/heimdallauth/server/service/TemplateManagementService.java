@@ -11,12 +11,15 @@ import java.util.List;
 @Slf4j
 public class TemplateManagementService {
     private final TemplateDataManager templateDataManager;
+    private final TemplateValidationService templateValidationService;
 
-    public TemplateManagementService(TemplateDataManager templateDataManager) {
+    public TemplateManagementService(TemplateDataManager templateDataManager, TemplateValidationService templateValidationService) {
         this.templateDataManager = templateDataManager;
+        this.templateValidationService = templateValidationService;
     }
 
     public TemplateModel createNewTemplate(TemplateModel templateModel){
+        this.templateValidationService.validateTemplate(templateModel);
         return this.createNewTemplate(
             templateModel.getTemplateName(),
             templateModel.getTemplateHtmlContent(),
@@ -44,5 +47,8 @@ public class TemplateManagementService {
     }
     public List<TemplateModel> getAllTemplates(){
         return this.templateDataManager.getAllTemplates();
+    }
+    public void deleteTemplate(String id){
+        this.templateDataManager.deleteTemplate(id);
     }
 }

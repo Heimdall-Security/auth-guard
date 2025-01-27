@@ -32,4 +32,9 @@ public class TemplateManagementController {
     public ResponseEntity<TemplateModel> updateTemplate(@PathVariable String templateId, @RequestBody TemplateModel templateUpdatePayload){
         return ResponseEntity.ok(templateManagementService.updateTemplate(templateId, templateUpdatePayload));
     }
+    @DeleteMapping("/{templateId}")
+    public ResponseEntity<Void> deleteTemplate(@PathVariable String templateId){
+        templateManagementService.deleteTemplate(templateId);
+        return ResponseEntity.ok().build();
+    }
 }
