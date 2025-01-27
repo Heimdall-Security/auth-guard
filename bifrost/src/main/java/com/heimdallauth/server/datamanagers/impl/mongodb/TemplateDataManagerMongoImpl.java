@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +40,8 @@ public class TemplateDataManagerMongoImpl implements TemplateDataManager {
                 .templateHtmlContent(templateHtmlContent)
                 .templatePlaintextContent(templatePlaintextContent)
                 .templateSubject(templateSubject)
+                .createdAt(Instant.now())
+                .lastUpdatedAt(Instant.now())
                 .build();
         List<String> savedIds = this.executeMongoDBSaveOperation(List.of(templateDocument), MongoCollectionConstants.TEMPLATE_COLLECTION);
         if (!savedIds.isEmpty()) {
@@ -70,6 +73,7 @@ public class TemplateDataManagerMongoImpl implements TemplateDataManager {
                     document.setTemplateHtmlContent(templateHtmlContent);
                     document.setTemplatePlaintextContent(templatePlaintextContent);
                     document.setTemplateSubject(templateSubject);
+                    document.setLastUpdatedAt(Instant.now());
                     this.mongoTemplate.save(document, MongoCollectionConstants.TEMPLATE_COLLECTION);
                 },
                 () -> {
