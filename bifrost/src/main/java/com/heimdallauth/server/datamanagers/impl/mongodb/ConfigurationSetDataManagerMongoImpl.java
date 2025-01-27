@@ -27,9 +27,11 @@ import java.util.*;
 @Slf4j
 public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDataManager, EmailSuppressionListDataManager {
     private final MongoTemplate mongoTemplate;
+    private final MongoBulkOperationsService mongoBulkOperationsService;
 
-    public ConfigurationSetDataManagerMongoImpl(MongoTemplate mongoTemplate) {
+    public ConfigurationSetDataManagerMongoImpl(MongoTemplate mongoTemplate, MongoBulkOperationsService mongoBulkOperationsService) {
         this.mongoTemplate = mongoTemplate;
+        this.mongoBulkOperationsService = mongoBulkOperationsService;
     }
 
     private String executeSaveEmailSuppressionList(EmailSuppressionList emailSuppressionList) {
@@ -44,22 +46,7 @@ public class ConfigurationSetDataManagerMongoImpl implements ConfigurationSetDat
     }
 
     private <T> List<String> executeMongoDBSaveOperation(List<T> objectCollection, String collectionName) {
-        Collection<T> savedCollection = this.mongoTemplate.insert(objectCollection, collectionName);
-        List<String> savedCollectionIds = new ArrayList<>();
-        log.debug("Saved {} objects to MongoDB collection {}", savedCollection.size(), collectionName);
-
-        if (!savedCollection.isEmpty()) {
-            try {
-                Method getIdMethod = savedCollection.iterator().next().getClass().getMethod("getId");
-                for (T document : savedCollection) {
-                    savedCollectionIds.add((String) getIdMethod.invoke(document));
-                }
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                log.error("Error retrieving IDs from saved documents", e);
-            }
-        }
-
-        return savedCollectionIds;
+        return this.mongoBulkOperationsService.executeMongoDBSaveOperation(objectCollection, collectionName);
     }
 
     private Optional<ConfigurationSet> getConfigurationSetById(String configurationSetId) {
