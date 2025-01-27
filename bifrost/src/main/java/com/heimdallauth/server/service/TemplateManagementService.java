@@ -45,4 +45,7 @@ public class TemplateManagementService {
     public List<TemplateModel> getAllTemplates(){
         return this.templateDataManager.getAllTemplates();
     }
+    public void deleteTemplate(String id){
+        this.templateDataManager.deleteTemplate(id);
+    }
 }
