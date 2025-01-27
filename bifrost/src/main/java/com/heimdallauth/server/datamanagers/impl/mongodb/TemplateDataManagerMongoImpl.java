@@ -88,6 +88,13 @@ public class TemplateDataManagerMongoImpl implements TemplateDataManager {
         }
 
     }
+
+    @Override
+    public List<TemplateModel> getAllTemplates() {
+        List<TemplateDocument> templateDocuments = this.mongoTemplate.findAll(TemplateDocument.class, MongoCollectionConstants.TEMPLATE_COLLECTION);
+        return templateDocuments.stream().map(TemplateDocument::toTemplateModel).toList();
+    }
+
     private Optional<TemplateDocument> getTemplateDocumentById(String id){
         Query selectTemplateByIdQuery = Query.query(Criteria.where("id").is(id));
         return Optional.ofNullable(this.mongoTemplate.findOne(selectTemplateByIdQuery, TemplateDocument.class, MongoCollectionConstants.TEMPLATE_COLLECTION));
