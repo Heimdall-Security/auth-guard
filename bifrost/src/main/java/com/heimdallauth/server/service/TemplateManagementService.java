@@ -33,6 +33,15 @@ public class TemplateManagementService {
     public TemplateModel getTemplateByName(String templateName){
         return this.templateDataManager.getTemplateByName(templateName);
     }
+    public TemplateModel updateTemplate(String id, TemplateModel templateModel){
+        return this.templateDataManager.updateTemplate(
+            id,
+            templateModel.getTemplateName(),
+            templateModel.getTemplateHtmlContent(),
+            templateModel.getTemplatePlaintextContent(),
+            templateModel.getTemplateSubject()
+        );
+    }
     public List<TemplateModel> getAllTemplates(){
         return this.templateDataManager.getAllTemplates();
     }
