@@ -4,6 +4,8 @@ import com.heimdallauth.server.commons.models.TemplateModel;
 import com.heimdallauth.server.constants.MongoCollectionConstants;
 import com.heimdallauth.server.datamanagers.TemplateDataManager;
 import com.heimdallauth.server.documents.TemplateDocument;
+import com.heimdallauth.server.exceptions.TemplateAlreadyExists;
+import com.heimdallauth.server.exceptions.TemplateDoesNotExists;
 import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -58,7 +60,7 @@ public class TemplateDataManagerMongoImpl implements TemplateDataManager {
     public TemplateModel getTemplateByName(String templateName) {
         Query selectTemplateByNameQuery = Query.query(Criteria.where("templateName").is(templateName));
         Optional<TemplateDocument> templateDocument = Optional.ofNullable(this.mongoTemplate.findOne(selectTemplateByNameQuery, TemplateDocument.class, MongoCollectionConstants.TEMPLATE_COLLECTION));
-        return templateDocument.map(TemplateDocument::toTemplateModel).orElseThrow();
+        return templateDocument.map(TemplateDocument::toTemplateModel).orElseThrow(()-> new TemplateDoesNotExists("Template with name " + templateName + " does not exist"));
     }
 
     @Override
