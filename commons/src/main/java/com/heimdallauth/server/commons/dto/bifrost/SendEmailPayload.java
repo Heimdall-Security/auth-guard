@@ -15,4 +15,5 @@ public class SendEmailPayload {
     private TemplateModel template;
     private ConfigurationSet activeConfigurationSet;
     private Object data;
+    private String replyToEmailAddress;
 }
