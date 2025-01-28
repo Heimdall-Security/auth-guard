@@ -1,6 +1,6 @@
 package com.heimdallauth.server.datamanagers;
 
-import com.heimdallauth.server.commons.models.UserProfileModel;
+import com.heimdallauth.server.commons.models.kratos.UserProfileModel;
 
 import java.util.List;
 import java.util.Optional;

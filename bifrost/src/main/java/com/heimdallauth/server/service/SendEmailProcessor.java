@@ -1,6 +1,7 @@
 package com.heimdallauth.server.service;
 
 import com.heimdallauth.server.commons.dto.bifrost.SendEmailPayload;
+import com.heimdallauth.server.commons.models.bifrost.EmailDataMap;
 import com.heimdallauth.server.commons.models.bifrost.RecipientModel;
 import com.heimdallauth.server.commons.models.bifrost.TemplateModel;
 import com.heimdallauth.server.configuration.HeimdallSmtpConfiguration;
@@ -72,26 +73,26 @@ public class SendEmailProcessor {
         this.executeEmailSend(processedEmailBodyModel, sendEmail);
 
     }
-    private void processInlineTemplate(SendEmailPayload payload, Object data) throws MessagingException {
+    private void processInlineTemplate(SendEmailPayload payload, EmailDataMap data) throws MessagingException {
         log.info("Processing inline template: {}", payload.getTemplate());
         ProcessedEmailBodyModel processedEmailBodyModel = this.processInitiateEmailTemplating(payload.getTemplate(), data);
         this.executeEmailSend(processedEmailBodyModel, payload);
 
     }
 
-    private ProcessedEmailBodyModel processInitiateEmailTemplating(TemplateModel template, Object data){
+    private ProcessedEmailBodyModel processInitiateEmailTemplating(TemplateModel template, EmailDataMap data){
         log.info("Processing initiate email templating: {}", template);
         return this.emailTemplateProcessor.processEmailTemplate(template, convertDataToMap(data));
     }
 
-    private static Map<String, Object> convertDataToMap(Object data) {
+    private static Map<String, Object> convertDataToMap(EmailDataMap data) {
         Map<String, Object> resultMap = new HashMap<>();
         if(data == null){
             return Collections.emptyMap();
         }
         Field[] declaredFields = data.getClass().getDeclaredFields();
         for (Field field: declaredFields){
-            ReflectionUtils.makeAccessible(field);
+            field.setAccessible(true);
             try{
                 resultMap.put(field.getName(), field.get(data));
             } catch (IllegalAccessException e) {

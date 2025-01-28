@@ -2,7 +2,7 @@ package com.heimdallauth.server.controller.v1;
 
 import com.heimdallauth.server.commons.dto.kratos.CreateDirectoryGroup;
 import com.heimdallauth.server.commons.dto.kratos.CreateRoleMappingWithGroup;
-import com.heimdallauth.server.commons.models.GroupModel;
+import com.heimdallauth.server.commons.models.kratos.GroupModel;
 import com.heimdallauth.server.services.GroupControllerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

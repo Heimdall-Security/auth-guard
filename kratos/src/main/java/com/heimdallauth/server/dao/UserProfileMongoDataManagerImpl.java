@@ -1,7 +1,7 @@
 package com.heimdallauth.server.dao;
 
 import com.heimdallauth.server.commons.constants.UserLifecycleStage;
-import com.heimdallauth.server.commons.models.UserProfileModel;
+import com.heimdallauth.server.commons.models.kratos.UserProfileModel;
 import com.heimdallauth.server.datamanagers.UserProfileDataManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
