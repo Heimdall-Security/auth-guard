@@ -1,6 +1,6 @@
 package com.heimdallauth.server.controller.v1;
 
-import com.heimdallauth.server.commons.models.UserProfileModel;
+import com.heimdallauth.server.commons.models.kratos.UserProfileModel;
 import com.heimdallauth.server.services.UserProfileService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

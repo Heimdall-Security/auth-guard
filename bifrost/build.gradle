@@ -29,6 +29,8 @@ ext {
 
 dependencies {
     implementation project(":commons")
+    implementation 'ognl:ognl:3.3.4'
+    implementation 'org.thymeleaf:thymeleaf:3.1.3.RELEASE'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'

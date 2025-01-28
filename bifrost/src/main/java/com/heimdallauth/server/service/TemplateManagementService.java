@@ -1,6 +1,6 @@
 package com.heimdallauth.server.service;
 
-import com.heimdallauth.server.commons.models.TemplateModel;
+import com.heimdallauth.server.commons.models.bifrost.TemplateModel;
 import com.heimdallauth.server.datamanagers.TemplateDataManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

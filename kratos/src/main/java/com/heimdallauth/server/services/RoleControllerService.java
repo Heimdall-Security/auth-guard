@@ -1,6 +1,6 @@
 package com.heimdallauth.server.services;
 
-import com.heimdallauth.server.commons.models.RoleModel;
+import com.heimdallauth.server.commons.models.kratos.RoleModel;
 import com.heimdallauth.server.datamanagers.RoleDataManager;
 import com.heimdallauth.server.exceptions.RoleNotFound;
 import lombok.extern.slf4j.Slf4j;

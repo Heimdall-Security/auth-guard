@@ -1,6 +1,6 @@
 package com.heimdallauth.server.documents;
 
-import com.heimdallauth.server.commons.models.TemplateModel;
+import com.heimdallauth.server.commons.models.bifrost.TemplateModel;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
