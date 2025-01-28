@@ -55,7 +55,7 @@ public class TemplateDataManagerMongoImpl implements TemplateDataManager {
     @Override
     public TemplateModel getTemplateById(String id) {
         Optional<TemplateDocument> templateDocument = this.getTemplateDocumentById(id);
-        return templateDocument.map(TemplateDocument::toTemplateModel).orElseThrow();
+        return templateDocument.map(TemplateDocument::toTemplateModel).orElseThrow(() -> new TemplateDoesNotExists("Template with id " + id + " does not exist"));
     }
 
     @Override
