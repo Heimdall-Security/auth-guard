@@ -34,6 +34,7 @@ public class TemplateRenderService {
         return textTemplateEngine.process(templatedString, thymeleafContext);
     }
     private String renderHtmlString(String templatedString, Map<String, Object> variableValueMap){
+        log.debug("Rendering templated string: {}", templatedString);
         Context thymeleafContext = new Context();
         thymeleafContext.setVariables(variableValueMap);
         return htmlTemplateEngine.process(templatedString, thymeleafContext);
