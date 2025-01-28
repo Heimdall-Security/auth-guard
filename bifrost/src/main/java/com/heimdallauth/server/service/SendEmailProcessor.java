@@ -91,7 +91,7 @@ public class SendEmailProcessor {
         }
         Field[] declaredFields = data.getClass().getDeclaredFields();
         for (Field field: declaredFields){
-            ReflectionUtils.makeAccessible(field);
+            field.setAccessible(true);
             try{
                 resultMap.put(field.getName(), field.get(data));
             } catch (IllegalAccessException e) {

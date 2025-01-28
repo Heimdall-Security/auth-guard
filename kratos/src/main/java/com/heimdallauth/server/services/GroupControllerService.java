@@ -1,8 +1,8 @@
 package com.heimdallauth.server.services;
 
 import com.heimdallauth.server.commons.dto.kratos.CreateDirectoryGroup;
-import com.heimdallauth.server.commons.models.GroupModel;
-import com.heimdallauth.server.commons.models.RoleModel;
+import com.heimdallauth.server.commons.models.kratos.GroupModel;
+import com.heimdallauth.server.commons.models.kratos.RoleModel;
 import com.heimdallauth.server.datamanagers.GroupDataManager;
 import com.heimdallauth.server.datamanagers.RoleDataManager;
 import lombok.extern.slf4j.Slf4j;
