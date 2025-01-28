@@ -1,7 +1,7 @@
 package com.heimdallauth.server.dao;
 
-import com.heimdallauth.server.commons.models.GroupModel;
-import com.heimdallauth.server.commons.models.RoleModel;
+import com.heimdallauth.server.commons.models.kratos.GroupModel;
+import com.heimdallauth.server.commons.models.kratos.RoleModel;
 import com.heimdallauth.server.datamanagers.GroupDataManager;
 import com.heimdallauth.server.datamanagers.RoleDataManager;
 import com.heimdallauth.server.exceptions.GroupNotFound;

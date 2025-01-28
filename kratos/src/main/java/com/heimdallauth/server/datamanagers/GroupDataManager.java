@@ -1,6 +1,6 @@
 package com.heimdallauth.server.datamanagers;
 
-import com.heimdallauth.server.commons.models.GroupModel;
+import com.heimdallauth.server.commons.models.kratos.GroupModel;
 
 import java.util.List;
 import java.util.Optional;

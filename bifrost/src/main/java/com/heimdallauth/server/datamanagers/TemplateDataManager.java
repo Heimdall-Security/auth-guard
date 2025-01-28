@@ -1,6 +1,6 @@
 package com.heimdallauth.server.datamanagers;
 
-import com.heimdallauth.server.commons.models.TemplateModel;
+import com.heimdallauth.server.commons.models.bifrost.TemplateModel;
 
 import java.util.List;
 

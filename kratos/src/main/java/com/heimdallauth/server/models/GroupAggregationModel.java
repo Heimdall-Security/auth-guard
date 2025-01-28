@@ -1,7 +1,7 @@
 package com.heimdallauth.server.models;
 
-import com.heimdallauth.server.commons.models.GroupModel;
-import com.heimdallauth.server.commons.models.RoleModel;
+import com.heimdallauth.server.commons.models.kratos.GroupModel;
+import com.heimdallauth.server.commons.models.kratos.RoleModel;
 import com.heimdallauth.server.dao.GroupMembershipDocument;
 import com.heimdallauth.server.dao.RoleDocument;
 import lombok.*;
