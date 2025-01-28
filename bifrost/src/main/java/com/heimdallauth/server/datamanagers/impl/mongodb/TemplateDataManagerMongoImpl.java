@@ -1,10 +1,9 @@
 package com.heimdallauth.server.datamanagers.impl.mongodb;
 
-import com.heimdallauth.server.commons.models.TemplateModel;
+import com.heimdallauth.server.commons.models.bifrost.TemplateModel;
 import com.heimdallauth.server.constants.MongoCollectionConstants;
 import com.heimdallauth.server.datamanagers.TemplateDataManager;
 import com.heimdallauth.server.documents.TemplateDocument;
-import com.heimdallauth.server.exceptions.TemplateAlreadyExists;
 import com.heimdallauth.server.exceptions.TemplateDoesNotExists;
 import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;

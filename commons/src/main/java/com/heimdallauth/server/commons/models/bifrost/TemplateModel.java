@@ -1,4 +1,4 @@
-package com.heimdallauth.server.commons.models;
+package com.heimdallauth.server.commons.models.bifrost;
 
 import lombok.*;
 
