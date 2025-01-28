@@ -20,16 +20,9 @@ public class EmailTemplateProcessor {
         this.templateRenderService = templateRenderService;
         this.templateDataManager = templateDataManager;
     }
-    public ProcessedEmailBodyModel processEmailTemplateByTemplateName(String templateName, Map<String, Object> variablesValueMap){
-        TemplateModel template = templateDataManager.getTemplateByName(templateName);
-        return processEmailTemplate(template, variablesValueMap);
-    }
-    public ProcessedEmailBodyModel processEmailTemplateById(String templateId, Map<String, Object> variablesValueMap){
-        TemplateModel template = templateDataManager.getTemplateById(templateId);
-        return processEmailTemplate(template, variablesValueMap);
-    }
 
-    private ProcessedEmailBodyModel processEmailTemplate(TemplateModel template, Map<String, Object> variablesValueMap){
+
+    protected ProcessedEmailBodyModel processEmailTemplate(TemplateModel template, Map<String, Object> variablesValueMap){
         String processedSubjectString = templateRenderService.renderTemplatedString(template.getTemplateSubject(), variablesValueMap);
         String processedHtmlBodyString = templateRenderService.renderTemplatedString(template.getTemplateHtmlContent(), variablesValueMap);
         String processedTextBodyString = templateRenderService.renderTemplatedString(template.getTemplatePlaintextContent(), variablesValueMap);
