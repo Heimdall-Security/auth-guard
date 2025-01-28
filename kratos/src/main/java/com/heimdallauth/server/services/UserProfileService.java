@@ -1,7 +1,7 @@
 package com.heimdallauth.server.services;
 
 import com.heimdallauth.server.commons.constants.UserLifecycleStage;
-import com.heimdallauth.server.commons.models.UserProfileModel;
+import com.heimdallauth.server.commons.models.kratos.UserProfileModel;
 import com.heimdallauth.server.datamanagers.UserProfileDataManager;
 import com.heimdallauth.server.exceptions.UserProfileAlreadyExist;
 import com.heimdallauth.server.exceptions.UserProfileNotFound;

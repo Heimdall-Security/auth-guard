@@ -1,6 +1,6 @@
 package com.heimdallauth.server.controller.v1;
 
-import com.heimdallauth.server.commons.models.RoleModel;
+import com.heimdallauth.server.commons.models.kratos.RoleModel;
 import com.heimdallauth.server.services.RoleControllerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

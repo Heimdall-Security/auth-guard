@@ -1,6 +1,6 @@
 package com.heimdallauth.server.controller.v1;
 
-import com.heimdallauth.server.commons.models.TemplateModel;
+import com.heimdallauth.server.commons.models.bifrost.TemplateModel;
 import com.heimdallauth.server.service.TemplateManagementService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
