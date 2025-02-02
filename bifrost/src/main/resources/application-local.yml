@@ -13,3 +13,12 @@ spring:
     consul:
       port: 8500
       host: localhost
+    vault:
+      enabled: true
+      host: vault-dev.eu-west-1.heimdallauth.com
+      authentication: approle
+      app-role:
+        app-role-path: approle
+        role-id: ${VAULT_ROLE_ID}
+        secret-id: ${VAULT_SECRET_ID}
+      port: 443
