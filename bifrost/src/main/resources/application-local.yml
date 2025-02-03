@@ -1,10 +1,6 @@
 server:
   port: 0
-
 spring:
-  data:
-    mongodb:
-      uri: ${MONGO_URI}
   cloud:
     config:
       enabled: false
@@ -22,3 +18,16 @@ spring:
         role-id: ${VAULT_ROLE_ID}
         secret-id: ${VAULT_SECRET_ID}
       port: 443
+resilience4j:
+  retry:
+    instances:
+      mongoInitRetry:
+        initial-wait-time: 15s
+        max-attempts: 5
+        wait-duration: 10s
+        exponential-backoff-multiplier: 2
+        fail-after-max-attempts: true
+        enable-exponential-backoff: true
+        retry-exceptions:
+          - org.springframework.data.mongodb.UncategorizedMongoDbException
+          - com.mongodb.MongoException
