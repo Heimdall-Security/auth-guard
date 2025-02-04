@@ -1,0 +1,13 @@
+
+spring:
+  data:
+    redis:
+      client-name: hydra
+      host: localhost
+      port: 6379
+    mongodb:
+      uri: mongodb+srv://${MONGO_ATLAS_USERNAME}:${MONGO_ATLAS_PASSWORD}@${MONGO_ATLAS_HOST}
+      authentication-database: admin
+      database: hydra-db
+server:
+  port: 0
