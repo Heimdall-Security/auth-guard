@@ -1,10 +1,6 @@
 server:
   port: 0
-
 spring:
-  data:
-    mongodb:
-      uri: ${MONGO_URI}
   cloud:
     config:
       enabled: false
@@ -13,3 +9,15 @@ spring:
     consul:
       port: 8500
       host: localhost
+resilience4j:
+  retry:
+    instances:
+      mongoInitRetry:
+        max-attempts: 5
+        wait-duration: 10s
+        exponential-backoff-multiplier: 2
+        fail-after-max-attempts: true
+        enable-exponential-backoff: true
+        retry-exceptions:
+          - com.heimdallauth.server.exceptions.DBNotReady
+          - java.lang.Exception
