@@ -26,13 +26,18 @@ public class MongoConfiguration {
     @Value("${MONGO_HOST}")
     private String mongoHost;
 
-    @Bean
-    public VaultDatabaseCredentialModel dbCredentials(VaultTemplate vaultTemplate) {
-        return getCredentialsFromVault(vaultTemplate);
+     VaultDatabaseCredentialModel getCredentialsFromVault(VaultTemplate vaultTemplate) {
+        VaultResponse vaultResponse = vaultTemplate.read(String.format("%s/creds/%s", DATABASE_ENGINE, DATABASE_ROLE));
+        return VaultDatabaseCredentialModel.builder()
+                .username((String) vaultResponse.getData().get("username"))
+                .password((String)vaultResponse.getData().get("password"))
+                .leaseId(vaultResponse.getLeaseId())
+                .leaseExpiryTimestamp(Instant.ofEpochMilli(vaultResponse.getLeaseDuration()))
+                .build();
     }
     @Bean
-    @Retry(name = "mongoInitRetry", fallbackMethod = "mongoClientFallbackMethod")
-    public MongoClient mongoClient(VaultDatabaseCredentialModel dbCredentials) throws InterruptedException {
+    public MongoClient mongoClient(VaultTemplate vaultTemplate) throws InterruptedException {
+         VaultDatabaseCredentialModel dbCredentials = getCredentialsFromVault(vaultTemplate);
         log.info("Vault lease id : {}, lease expiry timestamp : {}", dbCredentials.getLeaseId(), dbCredentials.getLeaseExpiryTimestamp());
         log.info("Waiting for mongo-atlas to be ready");
         Thread.sleep(15*1000); // Wait 15 seconds to allow mongo to be ready
@@ -40,6 +45,7 @@ public class MongoConfiguration {
         return MongoClients.create(connectionString);
     }
     @Bean
+    @Retry(name = "mongoInitRetry", fallbackMethod = "mongoClientFallbackMethod")
     public MongoTemplate mongoTemplate(MongoClient mongoClient) {
         log.info("Creating mongo template");
         try{
@@ -49,15 +55,7 @@ public class MongoConfiguration {
         }
     }
 
-    private VaultDatabaseCredentialModel getCredentialsFromVault(VaultTemplate vaultTemplate) {
-        VaultResponse vaultResponse = vaultTemplate.read(String.format("%s/creds/%s", DATABASE_ENGINE, DATABASE_ROLE));
-        return VaultDatabaseCredentialModel.builder()
-                .username((String) vaultResponse.getData().get("username"))
-                .password((String)vaultResponse.getData().get("password"))
-                .leaseId(vaultResponse.getLeaseId())
-                .leaseExpiryTimestamp(Instant.ofEpochMilli(vaultResponse.getLeaseDuration()))
-                .build();
-    }
+
     public MongoClient mongoClientFallbackMethod(VaultTemplate vaultTemplate) throws Exception {
         throw new Exception("Failed to get credentials from vault");
     }
