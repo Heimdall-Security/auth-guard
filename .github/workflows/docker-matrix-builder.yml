@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: [ 'jfk-gateway','kratos','bifrost' ]
+        image: [ 'jfk-gateway','kratos','bifrost' , 'hydra']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
