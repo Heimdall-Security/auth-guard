@@ -3,4 +3,5 @@ include 'commons'
 include 'jfk-gateway'
 include 'kratos'
 include 'bifrost'
+include 'hydra'
 
