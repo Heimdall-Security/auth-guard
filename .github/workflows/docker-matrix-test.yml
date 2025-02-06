@@ -3,19 +3,14 @@ name: Docker Matrix Builder
 on:
   push:
     branches:
-      - "release-candidate/**"
-    tags:
-      - 'v*'
+      - "*"
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
-  docker-image-builder:
+  java-ci:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        image: [ 'jfk-gateway','kratos','bifrost' ]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -33,7 +28,33 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: Build with Gradle
         run: ./gradlew clean build -x test
-
+      - name: upload-artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: |
+            jfk-gateway.jar
+            kratos.jar
+            bifrost.jar
+            hydra.jar
+          path: |
+            jfk-gateway/build/libs/
+            kratos/build/libs/
+            bifrost/build/libs/
+            hydra/build/libs/
+            
+  docker-build:
+    strategy:
+      matrix:
+        image: [ 'jfk-gateway', 'kratos', 'bifrost', 'hydra' ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: |
+            ${{ matrix.image }}.jar
       - name: Login TO Docker Registry
         uses: docker/login-action@v3
         with:
