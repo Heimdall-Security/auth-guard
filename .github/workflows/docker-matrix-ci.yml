@@ -1,6 +1,11 @@
 name: Docker Matrix Builder
 on:
+  pull_request:
+    branches:
+      - 'release-candidate/**'
   push:
+    branches:
+      - 'release-candidate/**'
     tags:
       - 'v*.*.*'
 permissions:
