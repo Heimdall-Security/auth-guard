@@ -41,6 +41,7 @@ jobs:
             bifrost/build/libs/
             hydra/build/libs/
   docker-build:
+    needs: java-ci
     strategy:
       matrix:
         image: [ 'jfk-gateway', 'kratos', 'bifrost', 'hydra' ]
