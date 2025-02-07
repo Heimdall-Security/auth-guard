@@ -28,7 +28,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build -x test
       - name: upload-artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: |
             jfk-gateway.jar
@@ -40,7 +40,6 @@ jobs:
             kratos/build/libs/
             bifrost/build/libs/
             hydra/build/libs/
-            
   docker-build:
     strategy:
       matrix:
