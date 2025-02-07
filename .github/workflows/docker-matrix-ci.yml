@@ -1,9 +1,13 @@
 name: Docker Matrix Builder
 on:
+  pull_request:
+    branches:
+      - 'release-candidate/*'
   push:
     branches:
-      - main
       - 'release-candidate/*'
+    tags:
+      - 'v*.*.*'
 permissions:
   contents: read
   packages: write
@@ -27,7 +31,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Build with Gradle
-        run: ./gradlew clean build -Pversion=${{}} -x test
+        run: ./gradlew clean build -x test
       - name: Upload Gateway Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -44,11 +48,16 @@ jobs:
         with:
           name: bifrost.jar
           path: bifrost/build/libs/*.jar
+      - name: Upload Hydra Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hydra.jar
+          path: hydra/build/libs/*.jar
   docker-build:
     needs: java-ci
     strategy:
       matrix:
-        image: [ 'jfk-gateway', 'kratos', 'bifrost' ]
+        image: [ 'jfk-gateway', 'kratos', 'bifrost', 'hydra' ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -80,7 +89,7 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-      - name: Build and Push JFK Gateway Image
+      - name: Build and Push ${{matrix.image}} image
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64

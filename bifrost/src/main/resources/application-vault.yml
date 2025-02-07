@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    vault:
+      enabled: true
+      host: vault-dev.eu-west-1.heimdallauth.com
+      port: 443
+      authentication: approle
+      app-role:
+        role-id: ${VAULT_ROLE_ID}
+        secret-id: ${VAULT_SECRET_ID}
