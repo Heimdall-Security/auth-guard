@@ -38,6 +38,11 @@ jobs:
         with:
           name: kratos.jar
           path: kratos/build/libs/*.jar
+      - name: Upload Bifrost Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bifrost.jar
+          path: bifrost/build/libs/*.jar
   docker-build:
     needs: java-ci
     strategy:
