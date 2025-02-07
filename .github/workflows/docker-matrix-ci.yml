@@ -44,6 +44,11 @@ jobs:
         with:
           name: bifrost.jar
           path: bifrost/build/libs/*.jar
+      - name: Upload Hydra Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hydra.jar
+          path: hydra/build/libs/*.jar
   docker-build:
     needs: java-ci
     strategy:
