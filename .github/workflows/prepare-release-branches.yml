@@ -18,12 +18,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create release branch
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git checkout -b release/${{ github.event.inputs.version }}
-          git push origin release/${{ github.event.inputs.version }}
+#      - name: Create release branch
+#        run: |
+#          git config --global user.name 'github-actions[bot]'
+#          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+#          git checkout -b release/${{ github.event.inputs.version }}
+#          git push origin release/${{ github.event.inputs.version }}
 
       - name: Create release-candidate branch
         run: |
