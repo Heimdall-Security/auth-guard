@@ -57,7 +57,7 @@ jobs:
     needs: java-ci
     strategy:
       matrix:
-        image: [ 'jfk-gateway', 'kratos', 'bifrost' ]
+        image: [ 'jfk-gateway', 'kratos', 'bifrost', 'hydra' ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
