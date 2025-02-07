@@ -1,9 +1,8 @@
 name: Docker Matrix Builder
 on:
   push:
-    branches:
-      - main
-      - 'release-candidate/*'
+    tags:
+      - 'v*.*.*'
 permissions:
   contents: read
   packages: write
@@ -27,7 +26,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Build with Gradle
-        run: ./gradlew clean build -Pversion=${{}} -x test
+        run: ./gradlew clean build -x test
       - name: Upload Gateway Artifact
         uses: actions/upload-artifact@v4
         with:
