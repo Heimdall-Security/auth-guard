@@ -1,21 +1,16 @@
 name: Docker Matrix Builder
-
 on:
   push:
     branches:
-      - "release-candidate/**"
-    tags:
-      - 'v*'
+      - main
+      - 'release-candidate/*'
 permissions:
   contents: read
+  packages: write
   pull-requests: write
-
 jobs:
-  docker-image-builder:
+  java-ci:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        image: [ 'jfk-gateway','kratos','bifrost' ]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -32,8 +27,37 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Build with Gradle
-        run: ./gradlew clean build -x test
-
+        run: ./gradlew clean build -Pversion=${{}} -x test
+      - name: Upload Gateway Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jfk-gateway.jar
+          path: jfk-gateway/build/libs/*.jar
+          retention-days: 1
+      - name: Upload Kratos Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kratos.jar
+          path: kratos/build/libs/*.jar
+      - name: Upload Bifrost Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bifrost.jar
+          path: bifrost/build/libs/*.jar
+  docker-build:
+    needs: java-ci
+    strategy:
+      matrix:
+        image: [ 'jfk-gateway', 'kratos', 'bifrost' ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.image }}.jar
+          path: ${{matrix.image}}/build/libs/jfk-gateway.jar
       - name: Login TO Docker Registry
         uses: docker/login-action@v3
         with:
