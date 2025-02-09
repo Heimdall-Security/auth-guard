@@ -5,27 +5,38 @@ import com.heimdallauth.server.config.HeimdallHydraConfiguration;
 import com.heimdallauth.server.datamanagers.AuthorizationServerDataManager;
 import com.heimdallauth.server.documents.AuthorizationServerDocument;
 import com.heimdallauth.server.utils.RandomIdGeneratorUtil;
+import com.mongodb.client.result.DeleteResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
+@Slf4j
 public class AuthorizationServerDataManagerMongoImpl implements AuthorizationServerDataManager {
+    private static final String AUTHORIZATION_SERVERS_COLLECTION_NAME = "authorization_servers";
+
     private final MongoTemplate mongoTemplate;
+    private final MongoBulkOperationsDAOService mongoBulkOperationsDAOService;
     private final HeimdallHydraConfiguration heimdallHydraConfiguration;
 
     @Autowired
-    public AuthorizationServerDataManagerMongoImpl(MongoTemplate mongoTemplate, HeimdallHydraConfiguration heimdallHydraConfiguration) {
+    public AuthorizationServerDataManagerMongoImpl(MongoTemplate mongoTemplate, MongoBulkOperationsDAOService mongoBulkOperationsDAOService, HeimdallHydraConfiguration heimdallHydraConfiguration) {
         this.mongoTemplate = mongoTemplate;
+        this.mongoBulkOperationsDAOService = mongoBulkOperationsDAOService;
         this.heimdallHydraConfiguration = heimdallHydraConfiguration;
     }
 
+    private <T> List<String> executeDbSaveOperation(List<T> documentsToSave, String collectionName){
+        return this.mongoBulkOperationsDAOService.executeMongoDBSaveOperation(documentsToSave, collectionName);
+    }
     @Override
     public AuthorizationServerModel createAuthorizationServer(String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds) {
         AuthorizationServerDocument authorizationServerDocument = AuthorizationServerDocument.builder()
@@ -36,7 +47,8 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
                 .isActive(isActive)
                 .authorizedServerIds(authorizedServerIds)
                 .build();
-        return mongoTemplate.save(authorizationServerDocument).toAuthorizationServerModel();
+        String savedServerId = executeDbSaveOperation(List.of(authorizationServerDocument), AUTHORIZATION_SERVERS_COLLECTION_NAME).getFirst();
+        return getAuthorizationServerById(savedServerId);
     }
 
     @Override
@@ -44,22 +56,38 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
         Query query = new Query();
         query.addCriteria(Criteria.where("id").is(serverId));
         AuthorizationServerDocument authorizationServerDocument = Optional.ofNullable(mongoTemplate.findOne(query, AuthorizationServerDocument.class)).orElseThrow(() -> new RuntimeException("Authorization Server not found"));
-        return null;
+        return authorizationServerDocument.toAuthorizationServerModel();
     }
 
     @Override
     public List<AuthorizationServerModel> getAuthorizationServers() {
-        return List.of();
+        List<AuthorizationServerDocument> authorizationServerDocuments = mongoTemplate.findAll(AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME);
+        return authorizationServerDocuments.stream().map(AuthorizationServerDocument::toAuthorizationServerModel).toList();
     }
 
     @Override
     public List<AuthorizationServerModel> getActiveAuthorizationServers() {
-        return List.of();
+        Query authorizationServersActive = Query.query(Criteria.where("isActive").is(true));
+        List<AuthorizationServerDocument> authorizationServerDocuments = mongoTemplate.find(authorizationServersActive, AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME);
+        return authorizationServerDocuments.stream().map(AuthorizationServerDocument::toAuthorizationServerModel).toList();
     }
 
     @Override
     public List<AuthorizationServerModel> getInactiveAuthorizationServers() {
-        return List.of();
+        Query authorizationServersActive = Query.query(Criteria.where("isActive").is(false));
+        List<AuthorizationServerDocument> authorizationServerDocuments = mongoTemplate.find(authorizationServersActive, AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME);
+        return authorizationServerDocuments.stream().map(AuthorizationServerDocument::toAuthorizationServerModel).toList();
+    }
+
+    /*
+    Possible race condition (when authorized server ids are cascaded) not required to be handled now but will need to be handled in Aggregation Pipelines. - not handled
+     */
+    @Override
+    public List<AuthorizationServerModel> getAuthorizationServersByIds(List<String> serverIds) {
+        Set<String> serverIdsSet = new HashSet<>(serverIds); //remove duplicated ids.
+        Query authorizationServersByIds = Query.query(Criteria.where("id").in(serverIdsSet));
+        List<AuthorizationServerDocument> authorizationServerDocuments = mongoTemplate.find(authorizationServersByIds, AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME);
+        return authorizationServerDocuments.stream().map(AuthorizationServerDocument::toAuthorizationServerModel).toList();
     }
 
     @Override
@@ -69,6 +97,9 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
 
     @Override
     public void deleteAuthorizationServer(String serverId) {
-
+        //TODO: Trigger a cleanup for the servers which refer to the deleted authorization servers.
+        Query authorizationServerById = Query.query(Criteria.where("id").is(serverId));
+        DeleteResult mongoDeleteResult = this.mongoBulkOperationsDAOService.executeBulkMongoDeleteOperation(authorizationServerById, AUTHORIZATION_SERVERS_COLLECTION_NAME);
+        log.debug("Deleted Authorization Server with id: {} and count: {}", serverId, mongoDeleteResult.getDeletedCount());
     }
 }
