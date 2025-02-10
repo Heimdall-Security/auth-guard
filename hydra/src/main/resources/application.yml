@@ -1,3 +1,14 @@
 spring:
   application:
     name: hydra
+  security:
+    user:
+      name: admin
+      password: admin
+
+  cloud:
+    consul:
+      discovery:
+        health-check-path: /api/hydra/actuator/health
+  servlet:
+    context-path: /api/hydra
