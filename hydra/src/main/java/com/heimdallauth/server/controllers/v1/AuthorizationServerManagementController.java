@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/v1/manage/authorization-servers")
 public class AuthorizationServerManagementController {
@@ -28,5 +30,9 @@ public class AuthorizationServerManagementController {
     @PutMapping("/{serverId}")
     public ResponseEntity<AuthorizationServerModel> updateAuthorizationServer(@PathVariable("serverId") String serverId, @RequestBody AuthorizationServerModel authorizationServerModel) {
         return ResponseEntity.ok(authorizationServerManagementService.updateAuthorizationServer(serverId, authorizationServerModel));
+    }
+    @GetMapping
+    public ResponseEntity<List<AuthorizationServerModel>> getAllAuthorizationServers(){
+        return ResponseEntity.ok(this.authorizationServerManagementService.getAuthorizationServers());
     }
 }

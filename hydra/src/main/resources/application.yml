@@ -10,5 +10,11 @@ spring:
     consul:
       discovery:
         health-check-path: /api/hydra/actuator/health
+server:
   servlet:
     context-path: /api/hydra
+heimdall:
+  hydra:
+    domain-name: heimdallauth.com
+    deployment-name: purpleid
+    protocol: https

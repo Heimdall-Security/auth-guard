@@ -39,11 +39,12 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
     }
     @Override
     public AuthorizationServerModel createAuthorizationServer(String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds) {
+        String serverId = RandomIdGeneratorUtil.generateRandomServerId();
         AuthorizationServerDocument authorizationServerDocument = AuthorizationServerDocument.builder()
-                .id(RandomIdGeneratorUtil.generateRandomServerId())
+                .id(serverId)
                 .authorizationServerName(serverName)
                 .authorizationServerDescription(serverDescription)
-                .issueUrl(heimdallHydraConfiguration.getDeploymentName() + heimdallHydraConfiguration.getDomainName() + "/oauth2/token")
+                .issueUrl(heimdallHydraConfiguration.getIssuerUrl(serverId))
                 .isActive(isActive)
                 .authorizedServerIds(authorizedServerIds)
                 .build();
@@ -55,7 +56,7 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
     public AuthorizationServerModel getAuthorizationServerById(String serverId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("id").is(serverId));
-        AuthorizationServerDocument authorizationServerDocument = Optional.ofNullable(mongoTemplate.findOne(query, AuthorizationServerDocument.class)).orElseThrow(() -> new RuntimeException("Authorization Server not found"));
+        AuthorizationServerDocument authorizationServerDocument = Optional.ofNullable(mongoTemplate.findOne(query, AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME)).orElseThrow(() -> new RuntimeException("Authorization Server not found"));
         return authorizationServerDocument.toAuthorizationServerModel();
     }
 
