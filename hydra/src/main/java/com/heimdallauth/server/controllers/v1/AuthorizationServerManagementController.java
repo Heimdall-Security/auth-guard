@@ -3,6 +3,7 @@ package com.heimdallauth.server.controllers.v1;
 import com.heimdallauth.server.commons.dto.hydra.CreateAuthorizationServerDTO;
 import com.heimdallauth.server.commons.models.hydra.AuthorizationServerModel;
 import com.heimdallauth.server.services.AuthorizationServerManagementService;
+import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class AuthorizationServerManagementController {
         return ResponseEntity.ok(authorizationServerManagementService.getAuthorizationServerById(serverId));
     }
     @PostMapping
-    public ResponseEntity<AuthorizationServerModel> createAuthorizationServer(@RequestBody CreateAuthorizationServerDTO createAuthorizationServerDTO) {
+    public ResponseEntity<AuthorizationServerModel> createAuthorizationServer(@RequestBody CreateAuthorizationServerDTO createAuthorizationServerDTO) throws JOSEException {
         return ResponseEntity.ok(authorizationServerManagementService.createAuthorizationServer(createAuthorizationServerDTO));
     }
     @PutMapping("/{serverId}")

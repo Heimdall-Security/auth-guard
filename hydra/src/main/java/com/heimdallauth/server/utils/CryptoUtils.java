@@ -28,10 +28,10 @@ public class CryptoUtils {
             throw new RuntimeException(e);
         }
     }
-    public static KeyPair generateECKeyPair(String curveName){
+    public static KeyPair generateECKeyPair(){
         try{
             KeyPairGenerator kpGen = KeyPairGenerator.getInstance(EC_ALGORITHM);
-            ECGenParameterSpec ecSpec = new ECGenParameterSpec(curveName);
+            ECGenParameterSpec ecSpec = new ECGenParameterSpec(Curve.P_521.getStdName());
             kpGen.initialize(ecSpec);
             return kpGen.generateKeyPair();
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
@@ -44,7 +44,7 @@ public class CryptoUtils {
         return jwkWithPrivate.toPublicJWK();
     }
 
-    private static JWK convertToJWKPrivate(KeyPair keyPair){
+    public static JWK convertToJWKPrivate(KeyPair keyPair){
         try{
             if(keyPair.getPrivate().getAlgorithm().equals(RSA_ALGORITHM)){
                 return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())

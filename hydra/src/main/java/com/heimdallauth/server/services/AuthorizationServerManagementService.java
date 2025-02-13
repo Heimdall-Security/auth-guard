@@ -3,6 +3,7 @@ package com.heimdallauth.server.services;
 import com.heimdallauth.server.commons.dto.hydra.CreateAuthorizationServerDTO;
 import com.heimdallauth.server.commons.models.hydra.AuthorizationServerModel;
 import com.heimdallauth.server.datamanagers.AuthorizationServerDataManager;
+import com.nimbusds.jose.JOSEException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -13,17 +14,21 @@ import java.util.List;
 @Slf4j
 public class AuthorizationServerManagementService {
     private final AuthorizationServerDataManager authServerDM;
+    private final KeyManagementService kms;
 
-    public AuthorizationServerManagementService(AuthorizationServerDataManager authServerDM) {
+    public AuthorizationServerManagementService(AuthorizationServerDataManager authServerDM, KeyManagementService kms) {
         this.authServerDM = authServerDM;
+        this.kms = kms;
     }
 
-    public AuthorizationServerModel createAuthorizationServer(CreateAuthorizationServerDTO authorizationServerCreatePayload) {
+    public AuthorizationServerModel createAuthorizationServer(CreateAuthorizationServerDTO authorizationServerCreatePayload) throws JOSEException {
+        String signingKeyId = this.kms.generateSigningKeyForToken(KeyManagementService.KeyType.EC);
         return authServerDM.createAuthorizationServer(
                 authorizationServerCreatePayload.getAuthorizationServerName(),
                 authorizationServerCreatePayload.getAuthorizationServerDescription(),
                 authorizationServerCreatePayload.isActive(),
-                authorizationServerCreatePayload.getAuthorizedServerIds()
+                authorizationServerCreatePayload.getAuthorizedServerIds(),
+                signingKeyId
         );
     }
     public List<AuthorizationServerModel> getAuthorizationServers() {
