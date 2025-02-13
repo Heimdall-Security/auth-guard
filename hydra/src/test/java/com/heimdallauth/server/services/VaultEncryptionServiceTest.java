@@ -28,4 +28,10 @@ class VaultEncryptionServiceTest {
         String decryptedString = vaultEncryptionService.decrypt(encryptedString);
         assertEquals(secretString, decryptedString);
     }
+    @Test
+    void getVaultKeyVersion() {
+        String secretString ="vault:v12:5M3yri4Yx+zcoTpnz3tzh8QP2HHGnsEG0ty6tybOfgsY6/fkp9Uy";
+        int keyVersion = VaultEncryptionService.getVaultKeyVersion(secretString);
+        assertInstanceOf(Integer.class, keyVersion);
+    }
 }

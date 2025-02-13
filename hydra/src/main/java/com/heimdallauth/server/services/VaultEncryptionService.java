@@ -36,4 +36,8 @@ public class VaultEncryptionService {
     private String reWrapEncryptedData(String encryptedValue){
         return vaultTransitOperations.rewrap(KEY_NAME, encryptedValue);
     }
+    public static int getVaultKeyVersion(String encryptedText){
+        String keyVersionString = encryptedText.split(":")[1];
+        return Integer.parseInt(keyVersionString.substring(1));
+    }
 }
