@@ -47,7 +47,7 @@ public class KeyManagementService {
         };
     }
     public String generateSigningKeyForToken(KeyType keyType) throws JOSEException {
-        String keyDatabaseId = RandomIdGeneratorUtil.generateRandomServerId();
+        String keyDatabaseId = RandomIdGeneratorUtil.generateRandomizedAlphaNumericId();
         JWK generatedSecretKey = CryptoUtils.convertToJWKPrivate(keyPairGeneratorHelper(keyType));
         this.dataManager.storeJWK(
                 keyDatabaseId,

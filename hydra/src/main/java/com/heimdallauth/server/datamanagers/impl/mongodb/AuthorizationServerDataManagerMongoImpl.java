@@ -40,7 +40,7 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
     }
     @Override
     public AuthorizationServerModel createAuthorizationServer(String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds, String signingKeyId) {
-        String serverId = RandomIdGeneratorUtil.generateRandomServerId();
+        String serverId = RandomIdGeneratorUtil.generateRandomizedAlphaNumericId();
         AuthorizationServerDocument authorizationServerDocument = AuthorizationServerDocument.builder()
                 .id(serverId)
                 .authorizationServerName(serverName)
