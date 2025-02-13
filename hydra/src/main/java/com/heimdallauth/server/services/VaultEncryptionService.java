@@ -1,9 +1,14 @@
 package com.heimdallauth.server.services;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.VaultTransitOperations;
+
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -11,9 +16,15 @@ public class VaultEncryptionService {
     private static final String TRANSIT_ENGINE_NAME = "heimdall-encryption";
     private static final String KEY_NAME = "hydra-jwt-encryption-key";
     private final VaultTransitOperations vaultTransitOperations;
+    private int latestKeyVersion = 0;
 
     public VaultEncryptionService(VaultTemplate vaultTemplate) {
         this.vaultTransitOperations = vaultTemplate.opsForTransit(TRANSIT_ENGINE_NAME);
+    }
+    @Scheduled(fixedRate = 100*60*60*2)
+    @PostConstruct
+    private void getLatestKey(){
+        this.latestKeyVersion = Objects.requireNonNull(this.vaultTransitOperations.getKey(KEY_NAME)).getLatestVersion();
     }
 
     protected String encrypt(String value){
