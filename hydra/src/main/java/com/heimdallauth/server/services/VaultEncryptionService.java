@@ -16,7 +16,7 @@ public class VaultEncryptionService {
     private static final String TRANSIT_ENGINE_NAME = "heimdall-encryption";
     private static final String KEY_NAME = "hydra-jwt-encryption-key";
     private final VaultTransitOperations vaultTransitOperations;
-    private int latestKeyVersion = 0;
+    protected int latestKeyVersion = 0;
 
     public VaultEncryptionService(VaultTemplate vaultTemplate) {
         this.vaultTransitOperations = vaultTemplate.opsForTransit(TRANSIT_ENGINE_NAME);
