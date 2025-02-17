@@ -7,6 +7,7 @@ import com.heimdallauth.server.services.VaultEncryptionService;
 import com.heimdallauth.server.utils.CryptoUtils;
 import com.nimbusds.jose.jwk.JWK;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -49,6 +50,7 @@ public class KeyDataManagerMongoImpl implements KeyDataManager {
     }
 
     @Override
+    @Cacheable(value = "publicJsonWebKeysCache", key="#keyId", unless = "#result == null")
     public JWK getPrivateKey(String keyId) {
         Query query = Query.query(Criteria.where("id").is(keyId));
         Optional<PrivateKeyDocument> privateKeyDocument = Optional.ofNullable(this.mongoTemplate.findOne(query, PrivateKeyDocument.class, PRIVATE_KEY_COLLECTION));
