@@ -1,6 +1,7 @@
 package com.heimdallauth.server.utils;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,10 +29,10 @@ public class CryptoUtils {
             throw new RuntimeException(e);
         }
     }
-    public static KeyPair generateECKeyPair(String curveName){
+    public static KeyPair generateECKeyPair(){
         try{
             KeyPairGenerator kpGen = KeyPairGenerator.getInstance(EC_ALGORITHM);
-            ECGenParameterSpec ecSpec = new ECGenParameterSpec(curveName);
+            ECGenParameterSpec ecSpec = new ECGenParameterSpec(Curve.P_521.getStdName());
             kpGen.initialize(ecSpec);
             return kpGen.generateKeyPair();
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
@@ -44,11 +45,12 @@ public class CryptoUtils {
         return jwkWithPrivate.toPublicJWK();
     }
 
-    private static JWK convertToJWKPrivate(KeyPair keyPair){
+    public static JWK convertToJWKPrivate(KeyPair keyPair){
         try{
             if(keyPair.getPrivate().getAlgorithm().equals(RSA_ALGORITHM)){
                 return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
                         .keyUse(KeyUse.SIGNATURE)
+                        .algorithm(JWSAlgorithm.RS256)
                         .privateKey((RSAPrivateKey) keyPair.getPrivate())
                         .keyIDFromThumbprint()
                         .build();
@@ -56,6 +58,8 @@ public class CryptoUtils {
             else if(keyPair.getPrivate().getAlgorithm().equals(EC_ALGORITHM)) {
                 return new ECKey.Builder(Curve.forECParameterSpec(((ECPublicKey) keyPair.getPublic()).getParams()), (ECPublicKey) keyPair.getPublic())
                         .privateKey(keyPair.getPrivate())
+                        .keyUse(KeyUse.SIGNATURE)
+                        .algorithm(JWSAlgorithm.ES512)
                         .keyIDFromThumbprint()
                         .build();
             }else{

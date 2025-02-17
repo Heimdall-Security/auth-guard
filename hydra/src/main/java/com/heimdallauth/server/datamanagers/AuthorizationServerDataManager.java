@@ -5,12 +5,13 @@ import com.heimdallauth.server.commons.models.hydra.AuthorizationServerModel;
 import java.util.List;
 
 public interface AuthorizationServerDataManager {
-    AuthorizationServerModel createAuthorizationServer(String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds);
+    AuthorizationServerModel createAuthorizationServer(String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds, String signingKeyId);
     AuthorizationServerModel getAuthorizationServerById(String serverId);
     List<AuthorizationServerModel> getAuthorizationServers();
     List<AuthorizationServerModel> getActiveAuthorizationServers();
     List<AuthorizationServerModel> getInactiveAuthorizationServers();
     List<AuthorizationServerModel> getAuthorizationServersByIds(List<String> serverIds);
+    AuthorizationServerModel updateSigningKeyId(String authorizationServerId, String signingKeyId);
     AuthorizationServerModel updateAuthorizationServer(String serverId, String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds);
     void deleteAuthorizationServer(String serverId);
 }

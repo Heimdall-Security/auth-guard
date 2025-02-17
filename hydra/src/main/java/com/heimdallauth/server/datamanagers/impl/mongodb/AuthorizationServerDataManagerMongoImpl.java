@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashSet;
@@ -38,8 +39,8 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
         return this.mongoBulkOperationsDAOService.executeMongoDBSaveOperation(documentsToSave, collectionName);
     }
     @Override
-    public AuthorizationServerModel createAuthorizationServer(String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds) {
-        String serverId = RandomIdGeneratorUtil.generateRandomServerId();
+    public AuthorizationServerModel createAuthorizationServer(String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds, String signingKeyId) {
+        String serverId = RandomIdGeneratorUtil.generateRandomizedAlphaNumericId();
         AuthorizationServerDocument authorizationServerDocument = AuthorizationServerDocument.builder()
                 .id(serverId)
                 .authorizationServerName(serverName)
@@ -47,6 +48,7 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
                 .issueUrl(heimdallHydraConfiguration.getIssuerUrl(serverId))
                 .isActive(isActive)
                 .authorizedServerIds(authorizedServerIds)
+                .signingKeyId(signingKeyId)
                 .build();
         String savedServerId = executeDbSaveOperation(List.of(authorizationServerDocument), AUTHORIZATION_SERVERS_COLLECTION_NAME).getFirst();
         return getAuthorizationServerById(savedServerId);
@@ -54,10 +56,13 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
 
     @Override
     public AuthorizationServerModel getAuthorizationServerById(String serverId) {
+        AuthorizationServerDocument authorizationServerDocument = getAuthorizationServerDocumentById(serverId);
+        return authorizationServerDocument.toAuthorizationServerModel();
+    }
+    private AuthorizationServerDocument getAuthorizationServerDocumentById(String serverId){
         Query query = new Query();
         query.addCriteria(Criteria.where("id").is(serverId));
-        AuthorizationServerDocument authorizationServerDocument = Optional.ofNullable(mongoTemplate.findOne(query, AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME)).orElseThrow(() -> new RuntimeException("Authorization Server not found"));
-        return authorizationServerDocument.toAuthorizationServerModel();
+        return Optional.ofNullable(mongoTemplate.findOne(query, AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME)).orElseThrow(() -> new RuntimeException("Authorization Server not found"));
     }
 
     @Override
@@ -89,6 +94,15 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
         Query authorizationServersByIds = Query.query(Criteria.where("id").in(serverIdsSet));
         List<AuthorizationServerDocument> authorizationServerDocuments = mongoTemplate.find(authorizationServersByIds, AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME);
         return authorizationServerDocuments.stream().map(AuthorizationServerDocument::toAuthorizationServerModel).toList();
+    }
+
+    @Override
+    public AuthorizationServerModel updateSigningKeyId(String authorizationServerId, String signingKeyId) {
+        Update updateSpec= new Update();
+        updateSpec.set("signingKeyId", signingKeyId);
+        Query authorizationServerById = Query.query(Criteria.where("id").is(authorizationServerId));
+        mongoTemplate.updateFirst(authorizationServerById, updateSpec, AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME);
+        return this.getAuthorizationServerById(authorizationServerId);
     }
 
     @Override

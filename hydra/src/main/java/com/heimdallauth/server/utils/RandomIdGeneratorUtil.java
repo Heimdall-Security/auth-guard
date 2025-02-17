@@ -18,7 +18,7 @@ public class RandomIdGeneratorUtil {
         }
     }
 
-    public static String generateRandomServerId(){
+    public static String generateRandomizedAlphaNumericId(){
         StringBuilder stringBuilder = new StringBuilder();
         for(int i = 0; i < ID_LENGTH; i++){
             stringBuilder.append(CHARSET.charAt(RANDOM.nextInt(CHARSET.length())));
