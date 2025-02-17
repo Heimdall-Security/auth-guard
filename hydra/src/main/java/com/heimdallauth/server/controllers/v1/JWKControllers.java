@@ -21,6 +21,6 @@ public class JWKControllers {
 
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> exposeJWK() {
-        return ResponseEntity.ok(this.kms.getAllKeysPublic());
+        return ResponseEntity.ok(this.kms.getPublicJWKStore());
     }
 }

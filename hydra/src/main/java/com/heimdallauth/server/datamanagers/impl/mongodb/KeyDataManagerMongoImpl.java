@@ -64,8 +64,14 @@ public class KeyDataManagerMongoImpl implements KeyDataManager {
 
     @Override
     public List<JWK> getAllPublicKeys() {
-        List<String> jwkStore = this.mongoTemplate.findAll(PublicKeyDocument.class, PUBLIC_KEY_COLLECTION).stream().map(PublicKeyDocument::getPublicKeyJson).toList();
-        return List.of();
+        return this.mongoTemplate.findAll(PublicKeyDocument.class, PUBLIC_KEY_COLLECTION).stream().map(publicKeyDocument -> {
+            try {
+                return JWK.parse(publicKeyDocument.getPublicKeyJson());
+            } catch (ParseException e) {
+                log.error("Error parsing JWK from database", e);
+            }
+            return null;
+        }).toList();
     }
 
     @Override
@@ -78,9 +84,8 @@ public class KeyDataManagerMongoImpl implements KeyDataManager {
         JWK publicJWKComponent = privateJWK.toPublicJWK();
         return PublicKeyDocument.builder()
                 .keyId(publicJWKComponent.getKeyID())
-                .keyType(publicJWKComponent.getKeyType().getValue())
-                .keyUse(publicJWKComponent.getKeyUse().getValue())
                 .keyAlgorithm(publicJWKComponent.getAlgorithm().getName())
+                .keyType(publicJWKComponent.getKeyType().getValue())
                 .linkedPrivateKeyId(privateJWK.getKeyID())
                 .publicKeyJson(publicJWKComponent.toJSONString())
                 .build();
@@ -88,6 +93,7 @@ public class KeyDataManagerMongoImpl implements KeyDataManager {
 
     private static PrivateKeyDocument convertJWWKToPrivateKeyDocument(String encryptedJWKString, String keyId, String keyUse, String keyAlgorithm) {
         return PrivateKeyDocument.builder()
+                .id(keyId)
                 .encryptedPrivateKey(encryptedJWKString)
                 .keyThumbprint(keyId)
                 .keyUse(keyUse)
