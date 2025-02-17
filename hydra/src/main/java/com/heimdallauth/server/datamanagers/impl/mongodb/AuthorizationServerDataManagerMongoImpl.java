@@ -8,7 +8,6 @@ import com.heimdallauth.server.utils.RandomIdGeneratorUtil;
 import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -53,7 +52,7 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
                 .signingKeyId(signingKeyId)
                 .build();
         String savedServerId = executeDbSaveOperation(List.of(authorizationServerDocument), AUTHORIZATION_SERVERS_COLLECTION_NAME).getFirst();
-        return getAuthorizationServerById(savedServerId);
+        return Optional.ofNullable(this.mongoTemplate.findById(savedServerId, AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME)).map(AuthorizationServerDocument::toAuthorizationServerModel).orElseThrow(() -> new RuntimeException("Authorization Server not found"));
     }
 
     @Override
