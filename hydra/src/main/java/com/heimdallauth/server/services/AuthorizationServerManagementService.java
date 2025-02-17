@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -21,8 +22,8 @@ public class AuthorizationServerManagementService {
         this.kms = kms;
     }
 
-    public AuthorizationServerModel createAuthorizationServer(CreateAuthorizationServerDTO authorizationServerCreatePayload) throws JOSEException {
-        String signingKeyId = this.kms.generateSigningKeyForToken(KeyManagementService.KeyType.EC);
+    public AuthorizationServerModel createAuthorizationServer(CreateAuthorizationServerDTO authorizationServerCreatePayload) {
+        String signingKeyId = kms.generateSigningKeyForAuthorizationServer(KeyManagementService.KeyAlgorithm.EC, Optional.empty());
         return authServerDM.createAuthorizationServer(
                 authorizationServerCreatePayload.getAuthorizationServerName(),
                 authorizationServerCreatePayload.getAuthorizationServerDescription(),

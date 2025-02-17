@@ -1,6 +1,7 @@
 package com.heimdallauth.server.utils;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,6 +50,7 @@ public class CryptoUtils {
             if(keyPair.getPrivate().getAlgorithm().equals(RSA_ALGORITHM)){
                 return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
                         .keyUse(KeyUse.SIGNATURE)
+                        .algorithm(JWSAlgorithm.RS256)
                         .privateKey((RSAPrivateKey) keyPair.getPrivate())
                         .keyIDFromThumbprint()
                         .build();
@@ -56,6 +58,8 @@ public class CryptoUtils {
             else if(keyPair.getPrivate().getAlgorithm().equals(EC_ALGORITHM)) {
                 return new ECKey.Builder(Curve.forECParameterSpec(((ECPublicKey) keyPair.getPublic()).getParams()), (ECPublicKey) keyPair.getPublic())
                         .privateKey(keyPair.getPrivate())
+                        .keyUse(KeyUse.SIGNATURE)
+                        .algorithm(JWSAlgorithm.ES512)
                         .keyIDFromThumbprint()
                         .build();
             }else{
