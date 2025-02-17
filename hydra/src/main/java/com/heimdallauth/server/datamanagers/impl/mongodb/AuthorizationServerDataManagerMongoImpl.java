@@ -8,6 +8,8 @@ import com.heimdallauth.server.utils.RandomIdGeneratorUtil;
 import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -55,7 +57,9 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
     }
 
     @Override
+    @Cacheable(value = "authorizationServerCache", key="#serverId", unless = "#result == null")
     public AuthorizationServerModel getAuthorizationServerById(String serverId) {
+        log.info("Triggering DB call to get Authorization Server with id: {}", serverId);
         AuthorizationServerDocument authorizationServerDocument = getAuthorizationServerDocumentById(serverId);
         return authorizationServerDocument.toAuthorizationServerModel();
     }
@@ -66,6 +70,7 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
     }
 
     @Override
+    @Cacheable(value = "authorizationServerCache", key="'allservers'")
     public List<AuthorizationServerModel> getAuthorizationServers() {
         List<AuthorizationServerDocument> authorizationServerDocuments = mongoTemplate.findAll(AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME);
         return authorizationServerDocuments.stream().map(AuthorizationServerDocument::toAuthorizationServerModel).toList();
@@ -89,6 +94,7 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
     Possible race condition (when authorized server ids are cascaded) not required to be handled now but will need to be handled in Aggregation Pipelines. - not handled
      */
     @Override
+    @Cacheable(value ="authorizationServerCache", key = "#serverIds", unless = "#result == null")
     public List<AuthorizationServerModel> getAuthorizationServersByIds(List<String> serverIds) {
         Set<String> serverIdsSet = new HashSet<>(serverIds); //remove duplicated ids.
         Query authorizationServersByIds = Query.query(Criteria.where("id").in(serverIdsSet));
