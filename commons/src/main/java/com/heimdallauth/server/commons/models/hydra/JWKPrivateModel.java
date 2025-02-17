@@ -12,6 +12,7 @@ import java.time.Instant;
 public class JWKPrivateModel {
     private String id;
     private String encryptedJWK;
+    private int cipherKeyVersion;
     private String encryptedJWKThumbprint;
     private String keyType;
     private int keySize;
