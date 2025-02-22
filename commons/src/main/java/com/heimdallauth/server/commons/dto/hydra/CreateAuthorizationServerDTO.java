@@ -14,4 +14,5 @@ public class CreateAuthorizationServerDTO {
     private String authorizationServerDescription;
     private boolean isActive;
     private List<String> authorizedServerIds;
+    private String keyType;
 }

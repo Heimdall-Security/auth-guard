@@ -15,6 +15,7 @@ public class AuthorizationServerModel {
     private String authorizationServerDescription;
     private String issueUrl;
     private String signingKeyId;
+    private String legacySigningKeyId;
     private boolean isActive;
     private List<ClientModel> clients;
     private List<AuthorizationServerModel> authorizedServers;
