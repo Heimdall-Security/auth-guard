@@ -45,12 +45,13 @@ public class AuthorizationServerManagementService {
         return authServerDM.getAuthorizationServerById(serverId);
     }
     public AuthorizationServerModel updateAuthorizationServer(String serverId, AuthorizationServerModel authorizationServerUpdatePayload) {
-        return authServerDM.updateAuthorizationServer(
+        authServerDM.updateAuthorizationServer(
                 serverId,
                 authorizationServerUpdatePayload.getAuthorizationServerName(),
                 authorizationServerUpdatePayload.getAuthorizationServerDescription(),
                 authorizationServerUpdatePayload.isActive(),
                 Collections.emptyList() //TODO remove and properly implement
         );
+        return authServerDM.getAuthorizationServerById(serverId);   //Another step for caching changes
     }
 }
