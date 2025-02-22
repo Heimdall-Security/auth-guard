@@ -1,7 +1,6 @@
 package com.heimdallauth.server.controllers.v1;
 
 import com.heimdallauth.server.services.KeyManagementService;
-import com.nimbusds.jose.jwk.JWK;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

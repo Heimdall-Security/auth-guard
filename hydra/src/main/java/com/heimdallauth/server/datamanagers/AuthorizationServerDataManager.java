@@ -12,6 +12,6 @@ public interface AuthorizationServerDataManager {
     List<AuthorizationServerModel> getInactiveAuthorizationServers();
     List<AuthorizationServerModel> getAuthorizationServersByIds(List<String> serverIds);
     AuthorizationServerModel updateSigningKeyId(String authorizationServerId, String signingKeyId);
-    AuthorizationServerModel updateAuthorizationServer(String serverId, String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds);
+    void updateAuthorizationServer(String serverId, String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds);
     void deleteAuthorizationServer(String serverId);
 }

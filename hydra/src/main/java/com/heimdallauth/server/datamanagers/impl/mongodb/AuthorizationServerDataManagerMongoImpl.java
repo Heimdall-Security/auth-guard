@@ -41,6 +41,7 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
         return this.mongoBulkOperationsDAOService.executeMongoDBSaveOperation(documentsToSave, collectionName);
     }
     @Override
+    @CacheEvict(value ="authorizationServerCache", key = "'allservers'") //Clear the all servers cache.
     public AuthorizationServerModel createAuthorizationServer(String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds, String signingKeyId) {
         String serverId = RandomIdGeneratorUtil.generateRandomizedAlphaNumericId();
         AuthorizationServerDocument authorizationServerDocument = AuthorizationServerDocument.builder()
@@ -53,7 +54,7 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
                 .signingKeyId(signingKeyId)
                 .build();
         String savedServerId = executeDbSaveOperation(List.of(authorizationServerDocument), AUTHORIZATION_SERVERS_COLLECTION_NAME).getFirst();
-        return getAuthorizationServerById(savedServerId);
+        return Optional.ofNullable(this.mongoTemplate.findById(savedServerId, AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME)).map(AuthorizationServerDocument::toAuthorizationServerModel).orElseThrow(() -> new RuntimeException("Authorization Server not found"));
     }
 
     @Override
@@ -63,6 +64,7 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
         AuthorizationServerDocument authorizationServerDocument = getAuthorizationServerDocumentById(serverId);
         return authorizationServerDocument.toAuthorizationServerModel();
     }
+
     private AuthorizationServerDocument getAuthorizationServerDocumentById(String serverId){
         Query query = new Query();
         query.addCriteria(Criteria.where("id").is(serverId));
@@ -103,17 +105,27 @@ public class AuthorizationServerDataManagerMongoImpl implements AuthorizationSer
     }
 
     @Override
+    @CacheEvict(value = "authorizationServerCache", key = "#authorizationServerId", beforeInvocation = true)
     public AuthorizationServerModel updateSigningKeyId(String authorizationServerId, String signingKeyId) {
+        AuthorizationServerDocument document = getAuthorizationServerDocumentById(authorizationServerId);
+        String oldSigningKeyId = document.getSigningKeyId();
         Update updateSpec= new Update();
         updateSpec.set("signingKeyId", signingKeyId);
+        updateSpec.set("legacySigningKeyId", oldSigningKeyId);
         Query authorizationServerById = Query.query(Criteria.where("id").is(authorizationServerId));
         mongoTemplate.updateFirst(authorizationServerById, updateSpec, AuthorizationServerDocument.class, AUTHORIZATION_SERVERS_COLLECTION_NAME);
-        return this.getAuthorizationServerById(authorizationServerId);
+        AuthorizationServerDocument updatedAuthorizationServer = this.getAuthorizationServerDocumentById(authorizationServerId);
+        return updatedAuthorizationServer.toAuthorizationServerModel();
     }
 
     @Override
-    public AuthorizationServerModel updateAuthorizationServer(String serverId, String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds) {
-        return null;
+    @CacheEvict(value = "authorizationServerCache", key = "#serverId", beforeInvocation = true)
+    public void updateAuthorizationServer(String serverId, String serverName, String serverDescription, boolean isActive, List<String> authorizedServerIds) {
+        Update updateSpec = new Update();
+        updateSpec.set("authorizationServerName", serverName);
+        updateSpec.set("authorizationServerDescription", serverDescription);
+        updateSpec.set("isActive", isActive);
+        updateSpec.set("authorizedServerIds", authorizedServerIds);
     }
 
     @Override
