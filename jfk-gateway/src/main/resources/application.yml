@@ -13,3 +13,7 @@ spring:
             uri: lb://bifrost
             predicates:
               - Path=/api/bifrost/**
+          - id: hydra
+            uri: lb://hydra
+            predicates:
+              - Path=/api/hydra/**
