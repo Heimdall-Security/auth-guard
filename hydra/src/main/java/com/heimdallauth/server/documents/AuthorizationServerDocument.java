@@ -20,6 +20,7 @@ public class AuthorizationServerDocument {
     private String authorizationServerDescription;
     private String issueUrl;
     private String signingKeyId;
+    private String legacySigningKeyId;
     private boolean isActive;
     private List<String> authorizedServerIds;
 
@@ -27,6 +28,8 @@ public class AuthorizationServerDocument {
         return AuthorizationServerModel.builder()
                 .id(this.getId())
                 .authorizationServerName(this.getAuthorizationServerName())
+                .legacySigningKeyId(this.getLegacySigningKeyId())
+                .signingKeyId(this.getSigningKeyId())
                 .authorizationServerDescription(this.getAuthorizationServerDescription())
                 .issueUrl(this.getIssueUrl())
                 .isActive(this.isActive())
